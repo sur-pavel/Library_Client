@@ -65,15 +65,17 @@ class GuiField {
         this.value = "$a183471";
     }
     GuiField(DataField field) {
-        fieldNum = Integer.parseInt(field.getTag());
         List subFields = field.getSubfields();
         StringBuilder builder = new StringBuilder();
         for (Object subField : subFields) {
             Subfield subfield = (Subfield) subField;
-            char code = subfield.getCode();
             String data = subfield.getData();
             builder.append(data);
         }
-        value = builder.toString();
+        this.check = false;
+        this.fieldNum = Integer.parseInt(field.getTag());
+        this.buttonNum = 1;
+        this.name = "название";
+        this.value = builder.toString();
     }
 }
