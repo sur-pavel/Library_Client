@@ -69,8 +69,9 @@ class GuiField {
         StringBuilder builder = new StringBuilder();
         for (Object subField : subFields) {
             Subfield subfield = (Subfield) subField;
+            char code = subfield.getCode();
             String data = subfield.getData();
-            builder.append(data);
+            builder.append("$").append(code).append(data);
         }
         this.check = false;
         this.fieldNum = Integer.parseInt(field.getTag());
