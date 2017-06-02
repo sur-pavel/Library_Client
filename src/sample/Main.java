@@ -4,15 +4,14 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamReader;
@@ -27,44 +26,35 @@ import java.util.List;
 
 public class Main extends Application {
     private List<DataField> dataFields;
-    double stageWidth;
-    double stageHeight;
+    ArrayList<Record> records = new ArrayList<Record>();
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
 
 
-        InputStream in = new FileInputStream("oneRec.ISO");
+        InputStream in = new FileInputStream("OneRecord.ISO");
         MarcReader reader = new MarcStreamReader(in, "UTF8");
         while (reader.hasNext()) {
             Record record = reader.next();
             dataFields = record.getDataFields();
+            records.add(record);
         }
+        primaryStage.setMaximized(true);
 
-        Screen screen = Screen.getPrimary();
-        Rectangle2D bounds = screen.getVisualBounds();
-
-        primaryStage.setX(bounds.getMinX());
-        primaryStage.setY(bounds.getMinY());
-        stageWidth = bounds.getWidth();
-        primaryStage.setWidth(stageWidth);
-        stageHeight = bounds.getHeight();
-        primaryStage.setHeight(stageHeight);
-
-        Group root = new Group();
-        Scene scene = new Scene(root, Color.WHITE);
-        root.getChildren().add(getRootSplitPane(scene));
-
+        Scene scene = new Scene(getRootSplitPane());
         primaryStage.setTitle("Library Client");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private SplitPane getRootSplitPane(Scene scene) {
+    private SplitPane getRootSplitPane() {
         SplitPane splitPaneH1 = new SplitPane(getSearchBox(), getEditorTabPane());
+        splitPaneH1.setDividerPositions(0.2);
         splitPaneH1.setOrientation(Orientation.HORIZONTAL);
-        SplitPane splitPaneH2 = new SplitPane(getFoundGPane(), getRecordViewer());
+        SplitPane splitPaneH2 = new SplitPane(getFoundGPane(), getViewer());
         splitPaneH2.setOrientation(Orientation.HORIZONTAL);
+        splitPaneH2.setDividerPositions(0.35);
         SplitPane splitPaneV = new SplitPane(splitPaneH1, splitPaneH2);
         splitPaneV.setOrientation(Orientation.VERTICAL);
         return splitPaneV;
@@ -74,15 +64,16 @@ public class Main extends Application {
         Tab tab = getEditorTab("Техонология");
         Tab tab2 = getEditorTab("Экземпляры");
         TabPane tabPane = new TabPane();
+//        tabPane.setPrefWidth(1267);
         tabPane.getTabs().add(tab);
         tabPane.getTabs().add(tab2);
         return tabPane;
     }
 
-    private BorderPane getRecordViewer() {
+    private BorderPane getViewer() {
         WebView webView = new WebView();
         webView.autosize();
-//        webView.setPrefSize(950, 220);
+        webView.setPrefSize(950, 220);
         WebEngine webEngine = webView.getEngine();
         StringBuilder builder = new StringBuilder();
         for (DataField dataField : dataFields) {
@@ -97,13 +88,24 @@ public class Main extends Application {
         }
         webEngine.loadContent(builder.toString());
         BorderPane borderPane = new BorderPane();
-        borderPane.setTop(webView);
+        borderPane.setCenter(webView);
+        borderPane.setPadding(new Insets(10));
         return borderPane;
     }
 
     private Tab getEditorTab(String name) {
         Tab tab = new Tab(name);
-        tab.setContent(getEditorGPane());
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToHeight(true);
+        ScrollBar s1 = new ScrollBar();
+        s1.setMax(500);
+        s1.setMin(0);
+        s1.setValue(100);
+        s1.setUnitIncrement(30);
+        s1.setBlockIncrement(35);
+        String[] tags = {"010", "100", "245", "250", "260", "300"};
+        scrollPane.setContent(getEditorGPane(tags));
+        tab.setContent(scrollPane);
         return tab;
     }
 
@@ -111,16 +113,15 @@ public class Main extends Application {
         VBox vbox = new VBox();
         HBox hBox = new HBox();
         vbox.setSpacing(5);
-        vbox.setPadding(new Insets(10, 0, 0, 10));
+        vbox.setPadding(new Insets(10, 10, 10, 10));
         hBox.setSpacing(5);
-        hBox.setPadding(new Insets(10, 0, 0, 10));
+        hBox.setPadding(new Insets(10, 10, 0, 10));
         Label label = new Label("Ключ:");
         TextField field = new TextField();
         hBox.getChildren().addAll(label, field);
         String[] columnsName = new String[]{"Кол-во", "Термины"};
         TableView table = getTableView(columnsName);
         vbox.getChildren().addAll(table, hBox);
-
         return vbox;
     }
 
@@ -133,34 +134,38 @@ public class Main extends Application {
     }
 
     private TableView getTableView(String[] columnsName) {
-        TableView table = new TableView();
+
+        TableView<Void> table = new TableView<>();
         table.setEditable(true);
         for (String s : columnsName) {
-            table.getColumns().add(new TableColumn(s));
+            TableColumn<Void, Void> column = new TableColumn<>(s);
+            table.getColumns().add(column);
+            double size = columnsName.length;
+            column.prefWidthProperty().bind(table.widthProperty().multiply(1/size));
         }
-        table.maxHeight(10);
         return table;
     }
 
-    private GridPane getEditorGPane() {
+    private GridPane getEditorGPane(String[] tags) {
         ArrayList<GuiField> guiFields = new ArrayList<>();
+        List fields = records.get(1).getVariableFields(tags);
         for (DataField dataField : dataFields) {
             guiFields.add(new GuiField(dataField));
         }
         GridPane gridPane = getGridPane();
         gridPane.setAlignment(Pos.CENTER);
-        for (int i = 1, size = guiFields.size(); i < size; i++) {
-            gridPane.add(new CheckBox(), 0, i);
+        for (int i = 0, size = guiFields.size(); i < size; i++) {
+            gridPane.add(new CheckBox(), 0, i+1);
 
-            String fieldTitle = String.join(": ", String.valueOf(guiFields.get(i).getFieldNum()), guiFields.get(i).getName());
-            gridPane.add(new Label(fieldTitle), 1, i);
+            Label label = new Label(guiFields.get(i).getName());
+            label.setMinWidth(200);
+            gridPane.add(label, 1, i+1);
 
-            gridPane.add(new Button(String.valueOf(guiFields.get(i).getButtonNum())), 2, i);
+            gridPane.add(new Button(String.valueOf(guiFields.get(i).getButtonNum())), 2, i+1);
             TextField field = new TextField(guiFields.get(i).getValue());
-            field.setPrefWidth(900);
-            gridPane.add(field, 3, i);
+            field.setPrefWidth(980);
+            gridPane.add(field, 3, i+1);
         }
-        gridPane.prefWidth(100);
         return gridPane;
     }
 
