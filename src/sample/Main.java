@@ -2,6 +2,8 @@ package sample;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -25,7 +27,8 @@ import java.util.List;
 
 public class Main extends Application {
     private List<DataField> dataFields;
-    private Record record;
+    double stageWidth;
+    double stageHeight;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -34,9 +37,8 @@ public class Main extends Application {
         InputStream in = new FileInputStream("oneRec.ISO");
         MarcReader reader = new MarcStreamReader(in, "UTF8");
         while (reader.hasNext()) {
-            record = reader.next();
+            Record record = reader.next();
             dataFields = record.getDataFields();
-            System.out.println(record.toString());
         }
 
         Screen screen = Screen.getPrimary();
@@ -44,44 +46,45 @@ public class Main extends Application {
 
         primaryStage.setX(bounds.getMinX());
         primaryStage.setY(bounds.getMinY());
-        primaryStage.setWidth(bounds.getWidth());
-        primaryStage.setHeight(bounds.getHeight());
+        stageWidth = bounds.getWidth();
+        primaryStage.setWidth(stageWidth);
+        stageHeight = bounds.getHeight();
+        primaryStage.setHeight(stageHeight);
 
         Group root = new Group();
         Scene scene = new Scene(root, Color.WHITE);
-        root.getChildren().add(getFirstGridPane(scene));
+        root.getChildren().add(getRootSplitPane(scene));
 
         primaryStage.setTitle("Library Client");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private GridPane getFirstGridPane(Scene scene) {
-        GridPane gridPane = new GridPane();
-        gridPane.setVgap(5);
-        gridPane.setHgap(5);
-//        gridPane.setPrefSize(WINDOW_WIDTH, WINDOW_HEIGHT); // Default width and height
-        gridPane.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-        gridPane.setPadding(new Insets(10));
-        gridPane.maxHeight(100);
-        Tab tab = getTab("Техонология");
-        Tab tab2 = getTab("Экземпляры");
+    private SplitPane getRootSplitPane(Scene scene) {
+        SplitPane splitPaneH1 = new SplitPane(getSearchBox(), getEditorTabPane());
+        splitPaneH1.setOrientation(Orientation.HORIZONTAL);
+        SplitPane splitPaneH2 = new SplitPane(getFoundGPane(), getRecordViewer());
+        splitPaneH2.setOrientation(Orientation.HORIZONTAL);
+        SplitPane splitPaneV = new SplitPane(splitPaneH1, splitPaneH2);
+        splitPaneV.setOrientation(Orientation.VERTICAL);
+        return splitPaneV;
+    }
+
+    private TabPane getEditorTabPane() {
+        Tab tab = getEditorTab("Техонология");
+        Tab tab2 = getEditorTab("Экземпляры");
         TabPane tabPane = new TabPane();
         tabPane.getTabs().add(tab);
         tabPane.getTabs().add(tab2);
-        ScrollPane scrollPane = getRecordViewer();
-        gridPane.add(getSearchBox(), 0, 0);
-        gridPane.add(tabPane, 1, 0);
-        gridPane.add(getFoundGPane(), 0, 1);
-        gridPane.add(scrollPane, 1, 1);
-        return gridPane;
+        return tabPane;
     }
 
-    private ScrollPane getRecordViewer() {
-        WebView browser = new WebView();
-        WebEngine webEngine = browser.getEngine();
+    private BorderPane getRecordViewer() {
+        WebView webView = new WebView();
+        webView.autosize();
+//        webView.setPrefSize(950, 220);
+        WebEngine webEngine = webView.getEngine();
         StringBuilder builder = new StringBuilder();
-
         for (DataField dataField : dataFields) {
             List subFields = dataField.getSubfields();
             for (Object subField : subFields) {
@@ -93,16 +96,14 @@ public class Main extends Application {
             builder.append("<br>");
         }
         webEngine.loadContent(builder.toString());
-        ScrollPane scrollPane = new ScrollPane(browser);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        return scrollPane;
+        BorderPane borderPane = new BorderPane();
+        borderPane.setTop(webView);
+        return borderPane;
     }
 
-    private Tab getTab(String name) {
+    private Tab getEditorTab(String name) {
         Tab tab = new Tab(name);
-        GridPane gridPane = getEditorGPane();
-        tab.setContent(gridPane);
+        tab.setContent(getEditorGPane());
         return tab;
     }
 
@@ -147,24 +148,16 @@ public class Main extends Application {
             guiFields.add(new GuiField(dataField));
         }
         GridPane gridPane = getGridPane();
-        gridPane.setGridLinesVisible(true);
-        ColumnConstraints column1 = new ColumnConstraints(10,10,Double.MAX_VALUE);
-        column1.setHgrow(Priority.ALWAYS);
-        ColumnConstraints column2 = new ColumnConstraints(10,10,Double.MAX_VALUE);
-        column2.setHgrow(Priority.ALWAYS);
-        ColumnConstraints column3 = new ColumnConstraints(10,10,Double.MAX_VALUE);
-        column3.setHgrow(Priority.ALWAYS);
-        ColumnConstraints column4 = new ColumnConstraints(100,100,Double.MAX_VALUE);
-        column4.setHgrow(Priority.ALWAYS);
+        gridPane.setAlignment(Pos.CENTER);
         for (int i = 1, size = guiFields.size(); i < size; i++) {
             gridPane.add(new CheckBox(), 0, i);
+
             String fieldTitle = String.join(": ", String.valueOf(guiFields.get(i).getFieldNum()), guiFields.get(i).getName());
-
             gridPane.add(new Label(fieldTitle), 1, i);
-            gridPane.add(new Button(String.valueOf(guiFields.get(i).getButtonNum())), 2, i);
 
+            gridPane.add(new Button(String.valueOf(guiFields.get(i).getButtonNum())), 2, i);
             TextField field = new TextField(guiFields.get(i).getValue());
-            field.prefWidth(100);
+            field.setPrefWidth(900);
             gridPane.add(field, 3, i);
         }
         gridPane.prefWidth(100);
