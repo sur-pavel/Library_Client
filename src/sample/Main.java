@@ -9,12 +9,10 @@ import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamReader;
@@ -38,6 +36,7 @@ public class Main extends Application {
     private TabPane editorPane = new TabPane();
     private WebEngine webEngine;
     private StringBuilder builder;
+    private Viewer viewer = new Viewer();
 
 
     @Override
@@ -47,15 +46,8 @@ public class Main extends Application {
         primaryStage.setMaximized(true);
 //        primaryStage.setFullScreen(true);
         currentRecord = records.get(0);
+        dataFields = currentRecord.getDataFields();
 
-// viewBorderPane
-        WebView webView = new WebView();
-        webView.autosize();
-        webView.setPrefSize(950, 220);
-        webEngine = webView.getEngine();
-        BorderPane viewBorderPane = new BorderPane();
-        viewBorderPane.setCenter(webView);
-        viewBorderPane.setPadding(new Insets(10));
 
 // foundGPane
         // foundTable
@@ -79,8 +71,8 @@ public class Main extends Application {
         foundGPane.add(foundTable, 1, 1);
 
 // editorPane
-        setEditorPane();
-        setViewer();
+        createEditorPane();
+
 //searchVBox
 
         //searchTableView
@@ -121,7 +113,7 @@ public class Main extends Application {
         SplitPane splitPaneH1 = new SplitPane(searchVBox, editorPane);
         splitPaneH1.setDividerPositions(0.2);
         splitPaneH1.setOrientation(Orientation.HORIZONTAL);
-        SplitPane splitPaneH2 = new SplitPane(foundGPane, viewBorderPane);
+        SplitPane splitPaneH2 = new SplitPane(foundGPane, viewer.create());
         splitPaneH2.setOrientation(Orientation.HORIZONTAL);
         splitPaneH2.setDividerPositions(0.35);
         SplitPane splitPaneV = new SplitPane(splitPaneH1, splitPaneH2);
@@ -133,7 +125,7 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    private void setEditorPane() {
+    private void createEditorPane() {
 
         int[] tags = {200, 210, 10, 700};
         editorPane.getTabs().clear();
@@ -162,9 +154,11 @@ public class Main extends Application {
         }
         scrollPane.setContent(vbox);
         tab.setContent(scrollPane);
-
-        dataFields = currentRecord.getDataFields();
-        for (DataField dataField : dataFields) {
+        return tab;
+    }
+private void updateEditorPane(){
+    dataFields = currentRecord.getDataFields();
+    for (DataField dataField : dataFields) {
             for (GuiField guiField : guiFieldArrayList) {
                 if (Integer.parseInt(dataField.getTag()) == guiField.getFieldNumber()) {
                     builder = new StringBuilder();
@@ -174,7 +168,7 @@ public class Main extends Application {
                 }
             }
         }
-        return tab;
+
     }
 
     private void setStringBuilder(DataField dataField) {
@@ -187,31 +181,6 @@ public class Main extends Application {
         }
     }
 
-    private StringBuilder getViewerBuilder() {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("<b>")
-                .append(getData(675, 'a',"<br>"))
-                .append(getData(899, 'm',"<br>"))
-                .append(getData(700, 'a',", "))
-                .append(getData(700, 'g',"<br>"))
-                .append("</b>")
-                .append(getData(200, 'a'," / "))
-                .append(getData(700, 'b'," "))
-                .append(getData(700, 'a',". - "))
-                .append(getData(210, 'a'," : "))
-                .append(getData(210, 'c',", "))
-                .append(getData(210, 'd',"."))
-
-
-        ;
-        return builder;
-    }
-
-    private void setViewer() {
-        webEngine.loadContent(getViewerBuilder().toString());
-    }
-
     private ListChangeListener<SearchValue> onItemSelected = itemSelected -> {
         for (SearchValue searchValue : itemSelected.getList())
             for (Record record : records) {
@@ -220,8 +189,8 @@ public class Main extends Application {
                     String foundedString = recordField.toString();
                     if (foundedString.contains(searchValue.getSearchValue())) {
                         currentRecord = record;
-                        setEditorPane();
-                        setViewer();
+                        updateEditorPane();
+                        viewer.update(currentRecord);
 
                     }
                 }
@@ -263,43 +232,6 @@ public class Main extends Application {
         }
     }
 
-    private String getFieldData(int number, char code) {
-        StringBuilder builder = new StringBuilder();
-        for (DataField dataField : dataFields) {
-            int tag = Integer.parseInt(dataField.getTag());
-            if (tag == number) {
-                List subFields = dataField.getSubfields(code);
-                for (Object subField : subFields) {
-                    Subfield subfield = (Subfield) subField;
-                    builder.append(subfield.getData());
-                }
-            }
-        }
-        return builder.toString();
-    }
-
-    private String getData(int number, char code, String nextString){
-        StringBuilder builder = new StringBuilder();
-        String string = getFieldData(number, code);
-        if (!string.equals("")){
-            builder.append(string)
-                    .append(nextString);
-        }
-        return builder.toString();
-    }
-
-    private String getFieldData(int number, char code, int subFNum) {
-        return getString(number, code, subFNum - 1);
-    }
-
-    private String getString(int number, char code, int subFNum) {
-        String data = "";
-        DataField field = (DataField) currentRecord.getVariableField(String.valueOf(number));
-        List subfields = field.getSubfields(code);
-        Subfield subfield = (Subfield) subfields.get(subFNum);
-        data = subfield.getData();
-        return data;
-    }
 
     public static void main(String[] args) {
         launch(args);
