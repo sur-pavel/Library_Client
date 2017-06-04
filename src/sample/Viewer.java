@@ -10,10 +10,11 @@ import org.marc4j.marc.Subfield;
 
 import java.util.List;
 
-public class Viewer {
+public class Viewer implements GuiElement{
     private WebEngine webEngine;
     private Record currentRecord;
 
+    @Override
     public BorderPane create() {
         WebView webView = new WebView();
         webView.autosize();
@@ -25,7 +26,8 @@ public class Viewer {
         return viewBorderPane;
     }
 
-    void update(Record record) {
+    @Override
+    public void update(Record record) {
         currentRecord = record;
         webEngine.loadContent(getViewerBuilder().toString());
     }

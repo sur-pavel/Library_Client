@@ -12,7 +12,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebEngine;
 import javafx.stage.Stage;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamReader;
@@ -31,18 +30,15 @@ public class Main extends Application {
     private final ObservableList<SearchValue> titles = FXCollections.observableArrayList();
     private List<DataField> dataFields;
     private ArrayList<Record> records = new ArrayList<>();
-    private ArrayList<GuiField> guiFieldArrayList = new ArrayList<>();
+
     private Record currentRecord;
-    private TabPane editorPane = new TabPane();
-    private WebEngine webEngine;
-    private StringBuilder builder;
     private Viewer viewer = new Viewer();
+    private Editor editor = new Editor();
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         unimarcGet();
-        createGuiFields();
         primaryStage.setMaximized(true);
 //        primaryStage.setFullScreen(true);
         currentRecord = records.get(0);
@@ -71,7 +67,7 @@ public class Main extends Application {
         foundGPane.add(foundTable, 1, 1);
 
 // editorPane
-        createEditorPane();
+
 
 //searchVBox
 
@@ -110,7 +106,7 @@ public class Main extends Application {
 
 
 //rootSplitPane
-        SplitPane splitPaneH1 = new SplitPane(searchVBox, editorPane);
+        SplitPane splitPaneH1 = new SplitPane(searchVBox, editor.create());
         splitPaneH1.setDividerPositions(0.2);
         splitPaneH1.setOrientation(Orientation.HORIZONTAL);
         SplitPane splitPaneH2 = new SplitPane(foundGPane, viewer.create());
@@ -125,61 +121,10 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    private void createEditorPane() {
 
-        int[] tags = {200, 210, 10, 700};
-        editorPane.getTabs().clear();
-        editorPane.getTabs().add(getТab("Основное БО", tags));
-        int[] tags2 = {910};
-        editorPane.getTabs().add(getТab("Экземпляры", tags2));
-    }
 
-    private Tab getТab(String name, int[] tags) {
-        Tab tab = new Tab(name);
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setFitToHeight(true);
-        ScrollBar scrollBar = new ScrollBar();
-        scrollBar.setMax(500);
-        scrollBar.setMin(0);
-        scrollBar.setValue(100);
-        scrollBar.setUnitIncrement(30);
-        scrollBar.setBlockIncrement(35);
-        VBox vbox = new VBox();
-        for (GuiField guiField : guiFieldArrayList) {
-            for (int tag : tags) {
-                if (tag == guiField.getFieldNumber()) {
-                    vbox.getChildren().add(guiField.getHBox());
-                }
-            }
-        }
-        scrollPane.setContent(vbox);
-        tab.setContent(scrollPane);
-        return tab;
-    }
-private void updateEditorPane(){
-    dataFields = currentRecord.getDataFields();
-    for (DataField dataField : dataFields) {
-            for (GuiField guiField : guiFieldArrayList) {
-                if (Integer.parseInt(dataField.getTag()) == guiField.getFieldNumber()) {
-                    builder = new StringBuilder();
-                    setStringBuilder(dataField);
-                    guiField.setValue(builder.toString());
 
-                }
-            }
-        }
 
-    }
-
-    private void setStringBuilder(DataField dataField) {
-        List subFields = dataField.getSubfields();
-        for (Object subField : subFields) {
-            Subfield subfield = (Subfield) subField;
-            char code = subfield.getCode();
-            String data = subfield.getData();
-            builder.append("$").append(code).append(data);
-        }
-    }
 
     private ListChangeListener<SearchValue> onItemSelected = itemSelected -> {
         for (SearchValue searchValue : itemSelected.getList())
@@ -189,7 +134,7 @@ private void updateEditorPane(){
                     String foundedString = recordField.toString();
                     if (foundedString.contains(searchValue.getSearchValue())) {
                         currentRecord = record;
-                        updateEditorPane();
+                        editor.update(currentRecord);
                         viewer.update(currentRecord);
 
                     }
@@ -225,12 +170,7 @@ private void updateEditorPane(){
 
     }
 
-    private void createGuiFields() {
-        for (String s : Constanst.fieldsName) {
-            int num = Integer.parseInt(s.split(":")[0]);
-            guiFieldArrayList.add(new GuiField(num, s));
-        }
-    }
+
 
 
     public static void main(String[] args) {
