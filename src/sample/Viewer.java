@@ -11,7 +11,7 @@ import org.marc4j.marc.Subfield;
 import java.util.List;
 
 public class Viewer implements GuiElement{
-    private WebEngine webEngine;
+     public WebEngine webEngine;
     private Record currentRecord;
 
     @Override
@@ -135,6 +135,7 @@ public class Viewer implements GuiElement{
     }
 
     private String getData(int number, char code, int subFNum) {
+
         return getSubString(number, code, subFNum - 1);
     }
 

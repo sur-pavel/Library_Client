@@ -9,6 +9,7 @@ import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -28,7 +29,6 @@ import java.util.List;
 public class Main extends Application {
 
     private final ObservableList<SearchValue> titles = FXCollections.observableArrayList();
-    private List<DataField> dataFields;
     private ArrayList<Record> records = new ArrayList<>();
 
     private Record currentRecord;
@@ -42,7 +42,7 @@ public class Main extends Application {
         primaryStage.setMaximized(true);
 //        primaryStage.setFullScreen(true);
         currentRecord = records.get(0);
-        dataFields = currentRecord.getDataFields();
+        List<DataField> dataFields = currentRecord.getDataFields();
 
 
 // foundGPane
@@ -92,6 +92,7 @@ public class Main extends Application {
         searchTableView.getSortOrder().add(searchValueColumn);
         searchValueColumn.setSortable(true);
         searchTableView.sort();
+        searchTableView.getSelectionModel().getSelectedItems().addListener(onItemSelected);
 
         VBox searchVBox = new VBox();
         HBox hBox = new HBox();
@@ -105,6 +106,7 @@ public class Main extends Application {
         searchVBox.getChildren().addAll(searchTableView, hBox);
 
 
+
 //rootSplitPane
         SplitPane splitPaneH1 = new SplitPane(searchVBox, editor.create());
         splitPaneH1.setDividerPositions(0.2);
@@ -114,7 +116,11 @@ public class Main extends Application {
         splitPaneH2.setDividerPositions(0.35);
         SplitPane splitPaneV = new SplitPane(splitPaneH1, splitPaneH2);
         splitPaneV.setOrientation(Orientation.VERTICAL);
-        searchTableView.getSelectionModel().getSelectedItems().addListener(onItemSelected);
+        splitPaneV.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.W && event.isAltDown()) {
+                editor.editorPane.requestFocus();
+            }
+        });
         Scene scene = new Scene(splitPaneV);
         primaryStage.setTitle("Library Client");
         primaryStage.setScene(scene);
