@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
@@ -15,12 +16,13 @@ import org.marc4j.marc.Subfield;
 
 import java.util.*;
 
-public class Editor implements GuiElement{
+public class Editor implements GuiElement {
     private int currentField;
     TabPane editorPane;
     private ArrayList<GuiField> guiFieldArrayList = new ArrayList<>();
     private StringBuilder builder;
     private Map<String, Integer> tabTextFields = new HashMap<>();
+
     @Override
     public BorderPane create() {
         createGuiFields();
@@ -67,6 +69,7 @@ public class Editor implements GuiElement{
         scrollBar.setUnitIncrement(30);
         scrollBar.setBlockIncrement(35);
         VBox vbox = new VBox();
+
         for (Integer tag : tags) {
             for (String s : Constants.fieldsName) {
                 int num = Integer.parseInt(s.split(":")[0]);
@@ -91,6 +94,7 @@ public class Editor implements GuiElement{
         tab.setContent(scrollPane);
         return tab;
     }
+
     @Override
     public void update(Record record) {
         List<DataField> dataFields;
@@ -106,6 +110,7 @@ public class Editor implements GuiElement{
             }
         }
     }
+
     private void setStringBuilder(DataField dataField) {
         List subFields = dataField.getSubfields();
         for (Object subField : subFields) {
@@ -123,6 +128,7 @@ public class Editor implements GuiElement{
             guiFieldArrayList.add(new GuiField(num, s));
         }
     }
+
     private GuiField getGuiField(int num) {
         int field = 0;
         for (int i = 0; i < guiFieldArrayList.size(); i++) {
@@ -143,15 +149,17 @@ public class Editor implements GuiElement{
                 case UP:
                     if (prev != 0) {
                         getGuiField(prev).getValueTextField().requestFocus();
+                        scroll();
                     }
-                    scroll();
+
                     break;
 
                 case DOWN:
                     if (next != 0) {
                         getGuiField(next).getValueTextField().requestFocus();
+                        scroll();
                     }
-//                    scroll();
+
                     break;
             }
 
@@ -176,9 +184,41 @@ public class Editor implements GuiElement{
 
     private void scroll() {
         HBox hbox = getGuiField(currentField).getHBox();
+
         ScrollPane scrollPane = (ScrollPane) editorPane.getSelectionModel().getSelectedItem().getContent();
 
+        double hboxHeight = hbox.getBoundsInParent().getMaxY();
+        VBox vBox = (VBox) hbox.getParent();
+
+        Bounds bounds = scrollPane.getViewportBounds();
+        int lowestXPixelShown = -1 * (int) bounds.getMinX() + 1;
+        int highestXPixelShown = -1 * (int) bounds.getMinX() + (int) bounds.getMaxX();
+        double sPHeight = scrollPane.getHeight();
+        double vBoxHeight = vBox.getHeight();
+        double set;
+        if (hboxHeight > sPHeight) {
+            set = scrollPane.getVvalue() + sPHeight / vBoxHeight / 1.5;
+            scrollPane.setVvalue(set);
+            System.out.println(new StringJoiner(" ")
+                    .add("highPixel ")
+                    .add(String.valueOf(highestXPixelShown))
+                    .add("lowPixel")
+                    .add(String.valueOf(lowestXPixelShown))
+                    .add("hbox")
+                    .add(String.valueOf(hboxHeight))
+                    .add("vbox")
+                    .add(String.valueOf(vBoxHeight))
+                    .add("sPHeight")
+                    .add(String.valueOf(sPHeight)));
+        }
     }
+
+
+
+
+
+
+
 
 
     private void firstGuiFieldListener() {
