@@ -1,27 +1,26 @@
 package sample;
 
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class SearchValue {
 
-    private final SimpleIntegerProperty countValue;
+//    private final SimpleIntegerProperty countValue;
     private final SimpleStringProperty searchValue;
 
 
-    SearchValue(Integer countVal, String searchVal) {
-        this.countValue = new SimpleIntegerProperty(countVal);
+    SearchValue(String searchVal) {
+//        this.countValue = new SimpleIntegerProperty(countVal);
         this.searchValue = new SimpleStringProperty(searchVal);
 
     }
 
-    public Integer getCountValue() {
-        return countValue.get();
-    }
+//    public Integer getCountValue() {
+//        return countValue.get();
+//    }
 
-    public void setCountValue(Integer countVal) {
-        countValue.set(countVal);
-    }
+//    public void setCountValue(Integer countVal) {
+//        countValue.set(countVal);
+//    }
 
     public String getSearchValue() {
         return searchValue.get();

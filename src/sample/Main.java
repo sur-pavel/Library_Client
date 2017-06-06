@@ -78,14 +78,23 @@ public class Main extends Application {
             }
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
                 search.create(editor, viewer, records);
+            }
+            if (event.getCode() == KeyCode.Q && event.isControlDown()) {
+                primaryStage.close();
+            }
+/*
+            if (event.getCode() == KeyCode.PLUS && event.isControlDown()) {
 
             }
+*/
+
         });
 
         Scene scene = new Scene(splitPaneV);
         primaryStage.setTitle("Library Client");
         primaryStage.setScene(scene);
         primaryStage.show();
+        editor.focusOnTextField();
     }
 
 
