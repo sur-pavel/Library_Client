@@ -29,7 +29,7 @@ public class Main extends Application {
     private Record currentRecord;
     private Viewer viewer = new Viewer();
     private Editor editor = new Editor();
-//    private Search search = new Search();
+    private Search search = new Search();
 
 
     @Override
@@ -77,7 +77,7 @@ public class Main extends Application {
                 editor.focusOnTextField();
             }
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
-//                search.create(editor, viewer, records);
+                search.create(editor, viewer, records);
             }
             if (event.getCode() == KeyCode.Q && event.isControlDown()) {
                 primaryStage.close();
