@@ -191,6 +191,7 @@ class Search {
                             String s2 = "";
                             String s3 = "";
                             StringJoiner joiner = new StringJoiner(". ").add(s);
+//                            if(containsAllWords(field.toString(), strings)){
                             if (subfieldCode == code && containsAllWords(value, strings)) {
                                 if (record.getVariableField(tag2) != null) {
                                     DataField field2 = (DataField) record.getVariableField(tag2);
