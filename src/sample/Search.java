@@ -145,51 +145,24 @@ class Search {
 
             for (Record record : records) {
                 Leader leader = record.getLeader();
-                System.out.println(searchValue.getLeader());
+                System.out.println("search:" + searchValue.getLeader());
+
                 if (leader.toString().equals(searchValue.getLeader())) {
-                    if (!searchValue.getEditionValue().equals("")) {
-/*                    String foundedString;
-                    String foundedString2;
-                    List recordFields = record.find("200");
-                    List recordFields2 = record.find("210");
+                    System.out.println("record:" + leader.toString());
+                    /*if (!searchValue.getEditionValue().equals("")) {
+                        if (record.getVariableField("205") != null && record.getVariableField("205").toString().contains(searchValue.getEditionValue())) {
 
-                    foundedString = recordFields.toString();
-                    foundedString2 = recordFields2.toString();
-                    System.out.println("Поиск значения" + foundedString + " " + foundedString2);
-                    String[] strings = searchValue.getSearchValue().split(" ");
-
-                    if (containsAllWords(foundedString, strings) && foundedString2.contains(searchValue.getCountValue())) {
-  */
-                        currentRecord = record;
-                        editor.update(currentRecord);
-                        viewer.update(currentRecord);
-
-
-                    } else {
-                        currentRecord = record;
-                        editor.update(currentRecord);
-                        viewer.update(currentRecord);
-                    }
-                }
-            }
-/*            for (Record record : records) {
-                String foundedString;
-                String foundedString2;
-                List recordFields = record.find("200", searchValue.getSearchValue());
-                List recordFields2 = record.find("210", searchValue.getCountValue());
-                for (Object recordField : recordFields) {
-                    for (Object recordField2 : recordFields2) {
-                        foundedString = recordField.toString();
-                        foundedString2 = recordField2.toString();
-                        System.out.println(foundedString + " " + foundedString2);
-                        if (foundedString.contains(searchValue.getSearchValue()) && foundedString2.contains(searchValue.getCountValue())) {
                             currentRecord = record;
                             editor.update(currentRecord);
                             viewer.update(currentRecord);
                         }
-                    }
+                    } else {*/
+                    currentRecord = record;
+                    editor.update(currentRecord);
+                    viewer.update(currentRecord);
                 }
-            }*/
+            }
+//            }
 
 
     };
