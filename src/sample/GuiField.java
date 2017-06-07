@@ -33,7 +33,7 @@ class GuiField {
         this.fieldNameLabel.setMaxWidth(400);
 
         this.valueTextField = new TextField();
-        this.valueTextField.setMinWidth(1000);
+        this.valueTextField.setMinWidth(1150);
         this.valueTextField.setFont(font);
 
 

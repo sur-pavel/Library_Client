@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class Porter {
 
-    private static final Pattern PERFECTIVEGROUND = Pattern.compile("((ив|ивши|ившись|ыв|ывши|ывшись)|((?&lt;=[ая])(в|вши|вшись)))$");
+    private static final Pattern PERFECTIVEGROUND = Pattern.compile("((ив|ивши|ившись|ыв|ывши|ывшись)|((?<=[ая])(в|вши|вшись)))$");
 
     private static final Pattern REFLEXIVE = Pattern.compile("(с[яь])$");
 
@@ -29,7 +29,7 @@ public class Porter {
     private static final Pattern P = Pattern.compile("ь$");
     private static final Pattern NN = Pattern.compile("нн$");
 
-    public String stem(String word) {
+    String stem(String word) {
         word = word.toLowerCase();
         word = word.replace('ё', 'е');
         Matcher m = RVRE.matcher(word);

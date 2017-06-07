@@ -38,7 +38,7 @@ public class Editor implements GuiElement {
         editorPane.getTabs().add(getТab("Специфические",
                 new ArrayList<>(Arrays.asList(230, 337, 135, 982, 916, 915, 115, 123, 509, 125, 36, 126, 130, 106, 239))));
         editorPane.getTabs().add(getТab("Экземпляры",
-                new ArrayList<>(Collections.singletonList(910))));
+                new ArrayList<>(Collections.singletonList(801))));
         editorPane.getTabs().add(getТab("Технология",
                 new ArrayList<>(Arrays.asList(905, 907, 951, 953, 902, 941, 940, 999, 933))));
         editorPane.getTabs().add(getТab("Систематизация",

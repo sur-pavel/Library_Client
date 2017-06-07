@@ -99,7 +99,7 @@ public class Main extends Application {
 
 
     private void unimarcGet() throws FileNotFoundException {
-        InputStream in = new FileInputStream("ManyRecords.ISO");
+        InputStream in = new FileInputStream("Происхождение жизни.ISO");
         MarcReader reader = new MarcStreamReader(in, "UTF8");
 
         // fill records
