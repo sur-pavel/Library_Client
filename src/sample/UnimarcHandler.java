@@ -5,6 +5,7 @@ import org.marc4j.MarcStreamReader;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
 
 import java.io.*;
 import java.util.*;
@@ -16,8 +17,6 @@ class UnimarcHandler {
     private Map<Leader, String> searchMap;
     private String mapFileName = "searchMap.ser";
     private ArrayList<File> marcFiles = new ArrayList<>();
-    private ArrayList<Integer> searchFields = new ArrayList<>
-            (Arrays.asList(700, 200, 606, 210, 205, 200));
 
 
     public Map<Leader, String> getSearchMap() {
@@ -34,7 +33,7 @@ class UnimarcHandler {
             if (listOfFile.isFile()) {
                 if (listOfFile.getName().contains("")) {
                     marcFiles.add(listOfFile);
-                    System.out.println("File " + listOfFile.getName() + "added.");
+                    System.out.println("File " + listOfFile.getName() + " added.");
                 }
             }
         }
@@ -62,55 +61,85 @@ class UnimarcHandler {
                 records.add(record);
             }
         }
-/*
         createSearchMap();
-        serializeMap();
-*/
+//        onChangeSerialize();
         return records;
+    }
+
+    private void onChangeSerialize() {
+        TimerTask task = new DirWatcher("marcFiles", "ISO") {
+            @Override
+            protected void onChange(File file, String action) {
+                // here we code the action on a change
+                System.out.println("File " + file.getName() + " action: " + action);
+                serializeMap();
+            }
+
+        };
+
+        Timer timer = new Timer();
+        timer.schedule(task, new Date(), 5000);
     }
 
 
     private void createSearchMap() {
-
-        searchMap = deSerializeMap() != null ? deSerializeMap() : new HashMap<>();
-
-        for (Record record : records) {
-            Leader leader = record.getLeader();
-            StringBuilder searchString = new StringBuilder();
-            for (Integer searchField : searchFields) {
-                if (record.getVariableField(String.valueOf(searchField)) != null) {
-                    DataField field = (DataField) record.getVariableField(String.valueOf(searchField));
-                    searchString.append(field.toString().toLowerCase());
-                }
+        if (deSerializeMap() != null) {
+            searchMap = deSerializeMap();
+        } else {
+            searchMap = new HashMap<>();
+            for (Record record : records) {
+                Leader leader = record.getLeader();
+                String searchString = subFieldData(record, "700", 'a') +
+                        subFieldData(record, "200", 'a') +
+                        subFieldData(record, "600", 'a');
+                searchMap.put(leader, searchString);
+//                System.out.println(searchString);
             }
-            searchMap.put(leader, searchString.toString());
+            serializeMap();
         }
+    }
+
+    private String subFieldData(Record record, String tag, char code) {
+        StringBuilder builder = new StringBuilder();
+        if (record.getVariableField(tag) != null) {
+            DataField field = (DataField) record.getVariableField(tag);
+            List subfields = field.getSubfields();
+            for (Object subField : subfields) {
+                Subfield subF = (Subfield) subField;
+                if (subF.getCode() == code)
+                    if(!subF.getData().equals(""))
+                    builder.append(subF.getData()).append(". ");
+            }
+        }
+        return builder.toString();
     }
 
     private HashMap<Leader, String> deSerializeMap() {
 
         HashMap<Leader, String> deSerializedMap = null;
+        File f = new File(mapFileName);
+        if (f.exists() && !f.isDirectory()) {
+            System.out.println("File exists.");
+            try {
+                FileInputStream fis = new FileInputStream(mapFileName);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                deSerializedMap = (HashMap<Leader, String>) ois.readObject();
+                ois.close();
+                fis.close();
+                System.out.println("HashMap deserialized");
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+                System.out.println(ioe.toString());
 
-        try {
-            FileInputStream fis = new FileInputStream(mapFileName);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            deSerializedMap = (HashMap<Leader, String>) ois.readObject();
-            ois.close();
-            fis.close();
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-            System.out.println(ioe.toString());
+            } catch (ClassNotFoundException c) {
+                System.out.println("Class not found");
+                c.printStackTrace();
 
-        } catch (ClassNotFoundException c) {
-            System.out.println("Class not found");
-            c.printStackTrace();
-
+            }
         }
-        System.out.println("HashMap deserialized");
-
         return deSerializedMap;
-    }
 
+    }
 
     private void serializeMap() {
         try {

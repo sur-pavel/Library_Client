@@ -78,6 +78,9 @@ public class Main extends Application {
             if (event.getCode() == KeyCode.Q && event.isControlDown()) {
                 primaryStage.close();
             }
+            if (event.getCode() == KeyCode.F4 && event.isAltDown()) {
+                primaryStage.close();
+            }
 /*
             if (event.getCode() == KeyCode.PLUS && event.isControlDown()) {
 
