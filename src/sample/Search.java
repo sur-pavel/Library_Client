@@ -15,10 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.marc4j.marc.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 
 class Search {
 
@@ -27,17 +24,109 @@ class Search {
     private Record currentRecord;
     private Porter porter = new Porter();
     private TableView<SearchValue> searchTableView;
+    private int currentRow = 0;
     private TableColumn searchValueColumn;
     private TableColumn countValueColumn;
+    private String[] searchFields = {"200"};
     private ArrayList<Record> records = new ArrayList<>();
     private final ObservableList<SearchValue> titles = FXCollections.observableArrayList();
 
 
-    void create(Editor ed, Viewer v, ArrayList<Record> recs) {
+    void create(Editor ed, Viewer v, ArrayList<Record> recs, Map<Leader, String> sMap) {
+
         viewer = v;
         editor = ed;
         records = recs;
+
         Stage searchStage = new Stage();
+        getSearchTableView(searchStage);
+        final ComboBox comboBox = getComboBox();
+        TextField field = getSearchField(comboBox);
+        HBox hBox = gethBox(field);
+        Label notification = new Label();
+        VBox searchVBox = getvBox(hBox, notification);
+
+        Scene searchScene = getScene(searchStage, field, searchVBox);
+        searchStage.setTitle("Search");
+        searchStage.setScene(searchScene);
+
+        searchStage.initModality(Modality.NONE);
+        searchStage.initOwner(editor.editorPane.getScene().getWindow());
+        searchStage.show();
+        searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
+        field.requestFocus();
+    }
+
+    private Scene getScene(Stage searchStage, TextField field, VBox searchVBox) {
+        Scene searchScene = new Scene(searchVBox, 800, 300);
+        searchScene.setOnKeyPressed(event -> {
+
+            if (event.getCode() == KeyCode.F && event.isControlDown()) {
+                currentRow = searchTableView.getSelectionModel().getFocusedIndex();
+                field.requestFocus();
+            }
+            if (event.getCode() == KeyCode.ESCAPE) {
+                searchStage.close();
+            }
+        });
+        return searchScene;
+    }
+
+    private VBox getvBox(HBox hBox, Label notification) {
+        VBox searchVBox = new VBox();
+        searchVBox.setSpacing(5);
+        searchVBox.setPadding(new Insets(10, 10, 10, 10));
+        searchVBox.getChildren().addAll(hBox, notification, searchTableView);
+        return searchVBox;
+    }
+
+    private HBox gethBox(TextField field) {
+        HBox hBox = new HBox();
+        hBox.setSpacing(5);
+        hBox.setPadding(new Insets(10, 10, 0, 10));
+        hBox.setAlignment(Pos.BASELINE_CENTER);
+        hBox.getChildren().add(field);
+        return hBox;
+    }
+
+    private ComboBox getComboBox() {
+        final ComboBox comboBox = new ComboBox();
+        comboBox.getItems().addAll("Заглавие", "Автор");
+        comboBox.setValue("Заглавие");
+        return comboBox;
+    }
+
+    private TextField getSearchField(ComboBox comboBox) {
+        TextField field = new TextField();
+        field.setPrefWidth(400);
+        field.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (comboBox.getValue() != null &&
+                    !comboBox.getValue().toString().isEmpty()) {
+                String fieldName = comboBox.getValue().toString();
+                String text = field.getText().toLowerCase();
+                if (text.length() > 3) search(fieldName, text);
+            }
+        });
+        field.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case ENTER:
+                   /* if (comboBox.getValue() != null &&
+                            !comboBox.getValue().toString().isEmpty()) {
+                        String s = comboBox.getValue().toString();
+                        String text = field.getText().toLowerCase();
+                        update(s, text);
+                    }*/
+                case DOWN:
+                    searchTableView.getFocusModel().focus(currentRow);
+                    break;
+
+
+            }
+        });
+        return field;
+    }
+
+    private void getSearchTableView(Stage searchStage) {
         searchTableView = new TableView<>();
         searchTableView.setEditable(true);
         countValueColumn = new TableColumn("Год");
@@ -63,74 +152,6 @@ class Search {
                     searchStage.close();
             }
         });
-
-        VBox searchVBox = new VBox();
-        HBox hBox = new HBox();
-        searchVBox.setSpacing(5);
-        searchVBox.setPadding(new Insets(10, 10, 10, 10));
-        hBox.setSpacing(5);
-        hBox.setPadding(new Insets(10, 10, 0, 10));
-
-        TextField field = new TextField();
-        field.setPrefWidth(400);
-
-        final ComboBox comboBox = new ComboBox();
-        comboBox.getItems().addAll("Заглавие", "Автор");
-        comboBox.setValue("Заглавие");
-
-
-        hBox.getChildren().add(field);
-        hBox.setAlignment(Pos.BASELINE_CENTER);
-        Label notification = new Label();
-        searchVBox.getChildren().addAll(hBox, notification, searchTableView);
-
-        Scene searchScene = new Scene(searchVBox, 800, 300);
-        searchStage.setTitle("Search");
-        searchStage.setScene(searchScene);
-
-        searchStage.initModality(Modality.NONE);
-        searchStage.initOwner(editor.editorPane.getScene().getWindow());
-        searchStage.show();
-        searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
-        field.requestFocus();
-        field.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (comboBox.getValue() != null &&
-                    !comboBox.getValue().toString().isEmpty()) {
-                String s = comboBox.getValue().toString();
-                String text = field.getText().toLowerCase();
-                update(s, text);
-            }
-        });
-
-        searchScene.setOnKeyPressed(event -> {
-
-            if (event.getCode() == KeyCode.F && event.isControlDown()) {
-                field.requestFocus();
-            }
-            if (event.getCode() == KeyCode.ESCAPE) {
-                searchStage.close();
-            }
-        });
-        field.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case ENTER:
-                   /* if (comboBox.getValue() != null &&
-                            !comboBox.getValue().toString().isEmpty()) {
-                        String s = comboBox.getValue().toString();
-                        String text = field.getText().toLowerCase();
-                        update(s, text);
-                    }*/
-                case DOWN:
-                    searchTableView.requestFocus();
-                    searchTableView.getSelectionModel().select(0);
-                    searchTableView.getFocusModel().focus(0);
-                    break;
-
-
-            }
-        });
-
-
     }
 
     private void autoSort(TableColumn searchValueColumn) {
@@ -142,97 +163,61 @@ class Search {
 
     private ListChangeListener<SearchValue> onItemSelected = itemSelected -> {
         for (SearchValue searchValue : itemSelected.getList())
-
             for (Record record : records) {
                 Leader leader = record.getLeader();
                 System.out.println("search:" + searchValue.getLeader());
-
                 if (leader.toString().equals(searchValue.getLeader())) {
                     System.out.println("record:" + leader.toString());
-                    /*if (!searchValue.getEditionValue().equals("")) {
-                        if (record.getVariableField("205") != null && record.getVariableField("205").toString().contains(searchValue.getEditionValue())) {
-
-                            currentRecord = record;
-                            editor.update(currentRecord);
-                            viewer.update(currentRecord);
-                        }
-                    } else {*/
                     currentRecord = record;
                     editor.update(currentRecord);
                     viewer.update(currentRecord);
                 }
             }
-//            }
-
-
     };
 
 
-    private void update(String string, String text) {
-        HashSet<SearchValue> set = new HashSet<>();
-        String[] strings = text.split(" ");
-        String tag = "200";
-        char code = 'a';
-        String tag2 = "210";
-        char code2 = 'd';
-
+    private void search(String fieldName, String input) {
+        String[] splitInput = input.split(" ");
 
         for (Record record : records) {
-            if (record.getVariableField(tag) != null) {
-                DataField field = (DataField) record.getVariableField(tag);
-                if (containsAllWords(field.toString(), strings)) {
-                    if (field.getSubfields() != null) {
-                        List subfields = field.getSubfields();
-                        for (Object subField : subfields) {
-                            Subfield subfield = (Subfield) subField;
-                            char subfieldCode = subfield.getCode();
-                            String s = subfield.getData();
-                            String value = s.toLowerCase();
-                            String s2 = "";
-                            String s3 = "";
-                            StringJoiner joiner = new StringJoiner(". ").add(s);
-//                            if(containsAllWords(field.toString(), strings)){
-                            if (subfieldCode == code && containsAllWords(value, strings)) {
-                                if (record.getVariableField(tag2) != null) {
-                                    DataField field2 = (DataField) record.getVariableField(tag2);
-                                    if (field2.getSubfield(code2) != null) {
-                                        s2 = field2.getSubfield(code2).getData();
-                                    }
-                                }
-                                if (record.getVariableField("205") != null) {
-                                    DataField field2 = (DataField) record.getVariableField("205");
-                                    if (field2.getSubfield('a') != null) {
-                                        s3 = field2.getSubfield('a').getData();
-                                    }
-                                }
 
-                                for (Object subField2 : subfields) {
-                                    Subfield volSubfield = (Subfield) subField2;
-                                    char subfieldCode2 = volSubfield.getCode();
-                                    if (subfieldCode2 == 'h')
-                                        joiner.add(volSubfield.getData());
-                                }
-
-                                Leader leader = record.getLeader();
-                                set.add(new SearchValue(leader.toString(), s2, joiner.toString(), s3));
-                            }
-
-                        }
-                    }
+            StringBuilder searchFieldsInRow = new StringBuilder();
+            for (String searchField : searchFields) {
+                if (record.getVariableField(String.valueOf(searchField)) != null) {
+                    DataField field = (DataField) record.getVariableField(searchField);
+                    searchFieldsInRow.append(field.toString().toLowerCase());
+                    System.out.println(searchFieldsInRow.toString());
                 }
             }
-
-        }
-        titles.clear();
-        for (Object o : set) {
-            SearchValue s = (SearchValue) o;
-            titles.add(s);
-            System.out.println("Добавление в лист:" + s.getCountValue() + " " + s.getSearchValue() + " " + s.getEditionValue());
+            if(containsAllWords(searchFieldsInRow.toString(), splitInput)){
+                Leader leader = record.getLeader();
+                    String title = new StringJoiner(". ")
+                            .add(subFieldData(record, "200", 'a'))
+                            .add(subFieldData(record, "200", 'h'))
+                            .add(subFieldData(record, "205", 'a'))
+                            .toString();
+                    String year = subFieldData(record, "210", 'd');
+                    titles.add(new SearchValue(leader.toString(), year, title));
+            }
         }
 
         searchTableView.setItems(titles);
         autoSort(countValueColumn);
         autoSort(searchValueColumn);
+    }
+
+    private String subFieldData(Record record, String tag, char code) {
+        StringJoiner joiner = new StringJoiner(". ");
+        if (record.getVariableField(tag) != null) {
+            DataField field = (DataField) record.getVariableField(tag);
+            List subfields = field.getSubfields();
+            for (Object subField : subfields) {
+                Subfield subF = (Subfield) subField;
+                if (subF.getCode() == code)
+                    joiner.add(subF.getData());
+            }
+        }
+        return joiner.toString();
     }
 
     private boolean containsAllWords(String word, String... keywords) {

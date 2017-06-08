@@ -10,14 +10,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import org.marc4j.MarcReader;
-import org.marc4j.MarcStreamReader;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,11 +25,12 @@ public class Main extends Application {
     private Viewer viewer = new Viewer();
     private Editor editor = new Editor();
     private Search search = new Search();
+    private UnimarcHandler unimarcHandler = new UnimarcHandler();
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        unimarcGet();
+        records = unimarcHandler.getUnimarc();
         primaryStage.setMaximized(true);
 //        primaryStage.setFullScreen(true);
         currentRecord = records.get(0);
@@ -77,7 +73,7 @@ public class Main extends Application {
                 editor.focusOnTextField();
             }
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
-                search.create(editor, viewer, records);
+                search.create(editor, viewer, records, unimarcHandler.getSearchMap());
             }
             if (event.getCode() == KeyCode.Q && event.isControlDown()) {
                 primaryStage.close();
@@ -98,19 +94,7 @@ public class Main extends Application {
     }
 
 
-    private void unimarcGet() throws FileNotFoundException {
-        InputStream in = new FileInputStream("ManyRecords1.ISO");
-        MarcReader reader = new MarcStreamReader(in, "UTF8");
 
-
-        // fill records
-        while (reader.hasNext()) {
-            Record record = reader.next();
-            records.add(record);
-        }
-
-
-    }
 
     public static void main(String[] args) {
         launch(args);
