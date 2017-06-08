@@ -11,7 +11,11 @@ import java.io.*;
 import java.util.*;
 
 
-class UnimarcHandler {
+class UnimarcHandler implements Runnable {
+
+    public ArrayList<Record> getRecords() {
+        return records;
+    }
 
     private ArrayList<Record> records = new ArrayList<>();
     private Map<Leader, String> searchMap;
@@ -23,7 +27,7 @@ class UnimarcHandler {
         return searchMap;
     }
 
-    ArrayList<Record> getUnimarc() {
+    private void getUnimarc() {
 
         File folder = new File("marcFiles");
         File[] listOfFiles = folder.listFiles();
@@ -63,7 +67,7 @@ class UnimarcHandler {
         }
         createSearchMap();
 //        onChangeSerialize();
-        return records;
+
     }
 
     private void onChangeSerialize() {
@@ -156,5 +160,9 @@ class UnimarcHandler {
     }
 
 
+    @Override
+    public void run() {
+        getUnimarc();
+    }
 }
 

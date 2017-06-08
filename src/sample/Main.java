@@ -10,31 +10,30 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Main extends Application {
 
 
     private ArrayList<Record> records = new ArrayList<>();
 
-    private Record currentRecord;
+
     private Viewer viewer = new Viewer();
     private Editor editor = new Editor();
     private Search search = new Search();
-    private UnimarcHandler unimarcHandler = new UnimarcHandler();
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        records = unimarcHandler.getUnimarc();
+        UnimarcHandler unimarcHandler = new UnimarcHandler();
+        Thread unimarcThread = new Thread(unimarcHandler);
+        unimarcThread.start();
         primaryStage.setMaximized(true);
 //        primaryStage.setFullScreen(true);
-        currentRecord = records.get(0);
-        List<DataField> dataFields = currentRecord.getDataFields();
+/*        currentRecord = records.get(0);
+        List<DataField> dataFields = currentRecord.getDataFields();*/
 
 
 // foundGPane
@@ -73,7 +72,7 @@ public class Main extends Application {
                 editor.focusOnTextField();
             }
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
-                search.create(editor, viewer, records, unimarcHandler.getSearchMap());
+                search.create(editor, viewer, unimarcHandler.getRecords(), unimarcHandler.getSearchMap());
             }
             if (event.getCode() == KeyCode.Q && event.isControlDown()) {
                 primaryStage.close();

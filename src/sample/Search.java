@@ -30,8 +30,8 @@ class Search {
     private Map<Leader, String> searchMap;
     private ArrayList<Record> records = new ArrayList<>();
     private final ObservableList<SearchValue> titles = FXCollections.observableArrayList();
-    Date start;
-    Date finish;
+    private Date start;
+    private Date finish;
 
 
     void create(Editor ed, Viewer v, ArrayList<Record> recs, Map<Leader, String> sMap) {
@@ -101,17 +101,23 @@ class Search {
     private TextField getSearchField(ComboBox comboBox) {
         TextField field = new TextField();
         field.setPrefWidth(400);
-        field.textProperty().addListener((observable, oldValue, newValue) -> {
+/*        field.textProperty().addListener((observable, oldValue, newValue) -> {
             if (comboBox.getValue() != null &&
                     !comboBox.getValue().toString().isEmpty()) {
                 String fieldName = comboBox.getValue().toString();
                 String text = field.getText().toLowerCase();
                 if (text.length() > 4) search(fieldName, text);
             }
-        });
+        });*/
         field.setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case ENTER:
+                    if (comboBox.getValue() != null &&
+                            !comboBox.getValue().toString().isEmpty()) {
+                        String fieldName = comboBox.getValue().toString();
+                        String text = field.getText().toLowerCase();
+                        if (text.length() > 4) search(fieldName, text);
+                    }
                 case DOWN:
                     searchTableView.requestFocus();
                     searchTableView.getSelectionModel().select(currentRow);
@@ -163,9 +169,7 @@ class Search {
         for (SearchValue searchValue : itemSelected.getList())
             for (Record record : records) {
                 Leader leader = record.getLeader();
-//                System.out.println("search:" + searchValue.getLeader());
                 if (leader.toString().equals(searchValue.getLeader())) {
-//                    System.out.println("record:" + leader.toString());
                     currentRecord = record;
                     editor.update(currentRecord);
                     viewer.update(currentRecord);
@@ -174,22 +178,22 @@ class Search {
     };
 
 
+
     private void search(String fieldName, String input) {
-        start = new Date();
+
         String[] splitInput = input.split(" ");
         ArrayList<Leader> leaders = new ArrayList<>();
 
         for (Map.Entry<Leader, String> entry : searchMap.entrySet()) {
             if (containsAllWords(entry.getValue(), splitInput)){
-                System.out.println(entry.getValue());
                 leaders.add(entry.getKey());
             }
         }
-        finish = new Date(); // search time: 132
         updateTableView(leaders);
     }
 
     private void updateTableView(ArrayList<Leader> leaders) {
+        start = new Date();
         titles.clear();
 
         for (Record record : records) {
@@ -211,9 +215,9 @@ class Search {
         autoSort(countValueColumn);
         autoSort(searchValueColumn);
 
-
-        long searchTime = finish.getTime() - start.getTime(); //search time: 2275 search time: 1755
-        System.out.println("search time: " + searchTime);
+        finish = new Date();
+        long searchTime = finish.getTime() - start.getTime();
+        System.out.println("TableView update time: " + searchTime);
     }
 
     private String subFieldData(Record record, String tag, char code) {
