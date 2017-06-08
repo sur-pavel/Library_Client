@@ -30,6 +30,8 @@ class Search {
     private Map<Leader, String> searchMap;
     private ArrayList<Record> records = new ArrayList<>();
     private final ObservableList<SearchValue> titles = FXCollections.observableArrayList();
+    Date start;
+    Date finish;
 
 
     void create(Editor ed, Viewer v, ArrayList<Record> recs, Map<Leader, String> sMap) {
@@ -104,21 +106,16 @@ class Search {
                     !comboBox.getValue().toString().isEmpty()) {
                 String fieldName = comboBox.getValue().toString();
                 String text = field.getText().toLowerCase();
-                if (text.length() > 2) search(fieldName, text);
+                if (text.length() > 4) search(fieldName, text);
             }
         });
         field.setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case ENTER:
-                   /* if (comboBox.getValue() != null &&
-                            !comboBox.getValue().toString().isEmpty()) {
-                        String s = comboBox.getValue().toString();
-                        String text = field.getText().toLowerCase();
-                        update(s, text);
-                    }*/
                 case DOWN:
-                    searchTableView.getFocusModel().focus(currentRow);
-                    break;
+                    searchTableView.requestFocus();
+                    searchTableView.getSelectionModel().select(currentRow);
+                    searchTableView.getFocusModel().focus(0);
 
 
             }
@@ -149,6 +146,7 @@ class Search {
         searchTableView.setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case ENTER:
+
                     searchStage.close();
             }
         });
@@ -177,47 +175,58 @@ class Search {
 
 
     private void search(String fieldName, String input) {
+        start = new Date();
         String[] splitInput = input.split(" ");
         ArrayList<Leader> leaders = new ArrayList<>();
 
         for (Map.Entry<Leader, String> entry : searchMap.entrySet()) {
-//            System.out.println(entry.getValue());
             if (containsAllWords(entry.getValue(), splitInput)){
+                System.out.println(entry.getValue());
                 leaders.add(entry.getKey());
             }
         }
+        finish = new Date(); // search time: 132
+        updateTableView(leaders);
+    }
 
+    private void updateTableView(ArrayList<Leader> leaders) {
         titles.clear();
+
         for (Record record : records) {
             for (Leader leader : leaders) {
-                if (record.getLeader().equals(leader)) {
-                    System.out.println(leader.toString());
-                    String title = new StringJoiner(". ")
+                if (record.getLeader().toString().equals(leader.toString())) {
+                    String title = new StringJoiner(" ")
                             .add(subFieldData(record, "200", 'a'))
                             .add(subFieldData(record, "200", 'h'))
                             .add(subFieldData(record, "205", 'a'))
                             .toString();
                     String year = subFieldData(record, "210", 'd');
-                    System.out.println(title + year);
                     titles.add(new SearchValue(leader.toString(), year, title));
                 }
             }
         }
 
-        searchTableView.setItems(titles);
+
+//        searchTableView.setItems(titles);
         autoSort(countValueColumn);
         autoSort(searchValueColumn);
+
+
+        long searchTime = finish.getTime() - start.getTime(); //search time: 2275 search time: 1755
+        System.out.println("search time: " + searchTime);
     }
 
     private String subFieldData(Record record, String tag, char code) {
-        StringJoiner joiner = new StringJoiner(". ");
+        StringJoiner joiner = new StringJoiner(" ");
         if (record.getVariableField(tag) != null) {
             DataField field = (DataField) record.getVariableField(tag);
             List subfields = field.getSubfields();
             for (Object subField : subfields) {
                 Subfield subF = (Subfield) subField;
-                if (subF.getCode() == code)
+                if (subF.getCode() == code && !subF.getData().equals("")) {
                     joiner.add(subF.getData());
+                }
+
             }
         }
         return joiner.toString();
@@ -226,7 +235,6 @@ class Search {
     private boolean containsAllWords(String word, String... keywords) {
         for (String k : keywords) {
             word = word.toLowerCase();
-            k = k.toLowerCase();
             k = porter.stem(k);
             if (!word.contains(k)) return false;
         }

@@ -202,14 +202,14 @@ public class Editor implements GuiElement {
         if (hboxHeight == 310 && vBoxHeight == 527)  scrollPane.setVvalue(0.03);
         if (hboxHeight == 310 && vBoxHeight == 403)  scrollPane.setVvalue(0.05);
         if (hboxHeight > 310) {
-            if (vBoxHeight == 372) set = scrollPane.getVvalue() + 0.47;
-            else if (vBoxHeight == 403) set = scrollPane.getVvalue() + 0.32;
-            else if (vBoxHeight == 465) set = scrollPane.getVvalue() + 0.195;
-            else if (vBoxHeight == 527) set = scrollPane.getVvalue() + 0.14;
-            else if (vBoxHeight == 682) set = scrollPane.getVvalue() + 0.0825;
+            if (vBoxHeight == 372) scrollPane.setVvalue(scrollPane.getVvalue() + 0.47);
+            else if (vBoxHeight == 403) scrollPane.setVvalue(scrollPane.getVvalue() + 0.32);
+            else if (vBoxHeight == 465) scrollPane.setVvalue(scrollPane.getVvalue() + 0.195);
+            else if (vBoxHeight == 527) scrollPane.setVvalue(scrollPane.getVvalue() + 0.14);
+            else if (vBoxHeight == 682) scrollPane.setVvalue(scrollPane.getVvalue() + 0.0825);
 
-            else set = scrollPane.getVvalue() + 0.1;
-            scrollPane.setVvalue(set);
+//            else set = scrollPane.getVvalue() + 0.1;
+//            scrollPane.setVvalue(set);
             System.out.println(new StringJoiner(" ")
                     .add("highPixel ")
                     .add(String.valueOf(highestXPixelShown))
@@ -220,9 +220,7 @@ public class Editor implements GuiElement {
                     .add("vbox")
                     .add(String.valueOf(vBoxHeight))
                     .add("sPHeight")
-                    .add(String.valueOf(sPHeight))
-                    .add("set ")
-                    .add(String.valueOf(set)));
+                    .add(String.valueOf(sPHeight)));
         }
     }
 
