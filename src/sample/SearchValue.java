@@ -50,6 +50,10 @@ public class SearchValue {
         this.searchValue.set(searchValue);
     }
 
+    public String toString(){
+        return getLeader() + getCountValue() + getSearchValue();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

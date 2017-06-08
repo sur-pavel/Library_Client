@@ -190,13 +190,15 @@ class Search {
         titles.clear();
         for (Record record : records) {
             for (Leader leader : leaders) {
-                if (leader.equals(record.getLeader())) {
+                if (record.getLeader().equals(leader)) {
+                    System.out.println(leader.toString());
                     String title = new StringJoiner(". ")
                             .add(subFieldData(record, "200", 'a'))
                             .add(subFieldData(record, "200", 'h'))
                             .add(subFieldData(record, "205", 'a'))
                             .toString();
                     String year = subFieldData(record, "210", 'd');
+                    System.out.println(title + year);
                     titles.add(new SearchValue(leader.toString(), year, title));
                 }
             }
