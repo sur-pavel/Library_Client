@@ -1,15 +1,13 @@
 package sample;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
@@ -61,38 +59,93 @@ public class Editor implements GuiElement {
         tabTextFields.put(name, tags.get(0));
         Tab tab = new Tab(name);
         ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setFitToHeight(true);
-        ScrollBar scrollBar = new ScrollBar();
-        scrollBar.setMax(500);
-        scrollBar.setMin(0);
-        scrollBar.setValue(100);
-        scrollBar.setUnitIncrement(30);
-        scrollBar.setBlockIncrement(35);
-        VBox vbox = new VBox();
-
-        for (Integer tag : tags) {
+        GridPane gridPane = new GridPane();
+        gridPane.setVgap(5);
+        gridPane.setHgap(5);
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setMaxSize(Region.USE_COMPUTED_SIZE,Region.USE_COMPUTED_SIZE);
+            int row = 0;
+        for (Integer integer : tags) {
             for (String s : Constants.fieldsName) {
                 int num = Integer.parseInt(s.split(":")[0]);
-                if (tag == num) {
-                    GuiField guiField = new GuiField(num, s);
-                    guiFieldArrayList.add(guiField);
-                    vbox.getChildren().add(guiField.getHBox());
+                if (integer == num) {
+                    CheckBox checkBox = new CheckBox();
+//                    checkBox.prefWidthProperty().bind(gridPane.widthProperty().subtract(10));
+                    gridPane.add(checkBox, 0, row);
+
+                    Label label = new Label(s);
+                    label.setFocusTraversable(false);
+                    label.setMaxWidth(300);
+                    label.setMinWidth(300);
+//                    label.prefWidthProperty().bind(gridPane.widthProperty().subtract(30));
+                    gridPane.add(label, 1, row);
+
+                    Button button = new Button("1");
+//                    button.prefWidthProperty().bind(gridPane.widthProperty().subtract(10));
+                    gridPane.add(button, 2, row);
+
+
+                    TextField textField = new TextField();
+                    textField.setMaxWidth(800);
+                    textField.setMinWidth(800);
+//                    textField.prefWidthProperty().bind(gridPane.widthProperty().subtract(60));
+                    textField.setOnKeyPressed(event -> {
+                        switch (event.getCode()) {
+                            case DOWN:
+                                ObservableList<Node> children = gridPane.getChildren();
+                                for (int i = 0, size = children.size(); i < size; i++) {
+                                    if (children.get(i).isFocused()) {
+                                        if (i + 2 > size) {
+                                            children.get(3).requestFocus();
+                                            scrollPane.setVvalue(0);
+                                            break;
+                                        } else {
+                                            int nextTextFieldId = i + 4;
+                                            children.get(nextTextFieldId).requestFocus();
+                                            nodeInScrollPane(scrollPane, children.get(nextTextFieldId), 0.95);
+                                            break;
+                                        }
+                                    }
+                                }
+                                break;
+                            case UP:
+                                children = gridPane.getChildren();
+                                for (int i = 0, size = children.size(); i < size; i++) {
+                                    if (children.get(i).isFocused()) {
+                                        if (i - 4 < 0) {
+                                            children.get(size - 1).requestFocus();
+                                            scrollPane.setVvalue(1);
+                                            break;
+                                        } else {
+                                            int previousTextFieldId = i - 4;
+                                            children.get(previousTextFieldId).requestFocus();
+                                            nodeInScrollPane(scrollPane, children.get(previousTextFieldId), 0.05);
+                                            break;
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+                    });
+                    gridPane.add(textField, 3, row);
+                    GridPane.setHgrow(label, Priority.ALWAYS);
+                    GridPane.setHgrow(textField, Priority.ALWAYS);
+                    row += 1;
                 }
             }
         }
-
-        for (int i = 0; i < tags.size(); i++) {
-            int prev = 0;
-            int next = 0;
-            if (i != 0) prev = tags.get(i - 1);
-            if (i != tags.size() - 1) next = tags.get(i + 1);
-            setGuiFieldListener(prev, tags.get(i), next);
-        }
-        firstGuiFieldListener();
-
-        scrollPane.setContent(vbox);
+        scrollPane.setContent(gridPane);
         tab.setContent(scrollPane);
         return tab;
+    }
+
+    private void nodeInScrollPane(ScrollPane scrollPane, Node node, double k) {
+        double h = scrollPane.getContent().getBoundsInLocal().getHeight();
+        double y = (node.getBoundsInParent().getMaxY() +
+                node.getBoundsInParent().getMinY()) / 2.0;
+        double v = scrollPane.getViewportBounds().getHeight();
+        if (y > v || y < v)
+        scrollPane.setVvalue(scrollPane.getVmax() * ((y - k * v) / (h - v)));
     }
 
     @Override
@@ -196,11 +249,11 @@ public class Editor implements GuiElement {
         double sPHeight = scrollPane.getHeight();
         double vBoxHeight = vBox.getHeight();
         double set;
-        if (hboxHeight == 310 && vBoxHeight == 372)  scrollPane.setVvalue(0.1);
-        if (hboxHeight == 310 && vBoxHeight == 682)  scrollPane.setVvalue(0.02);
-        if (hboxHeight == 310 && vBoxHeight == 465)  scrollPane.setVvalue(0.03);
-        if (hboxHeight == 310 && vBoxHeight == 527)  scrollPane.setVvalue(0.03);
-        if (hboxHeight == 310 && vBoxHeight == 403)  scrollPane.setVvalue(0.05);
+        if (hboxHeight == 310 && vBoxHeight == 372) scrollPane.setVvalue(0.1);
+        if (hboxHeight == 310 && vBoxHeight == 682) scrollPane.setVvalue(0.02);
+        if (hboxHeight == 310 && vBoxHeight == 465) scrollPane.setVvalue(0.03);
+        if (hboxHeight == 310 && vBoxHeight == 527) scrollPane.setVvalue(0.03);
+        if (hboxHeight == 310 && vBoxHeight == 403) scrollPane.setVvalue(0.05);
         if (hboxHeight > 310) {
             if (vBoxHeight == 372) scrollPane.setVvalue(scrollPane.getVvalue() + 0.47);
             else if (vBoxHeight == 403) scrollPane.setVvalue(scrollPane.getVvalue() + 0.32);
