@@ -64,14 +64,10 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        editor.editorPane.focusedProperty().addListener((arg0, oldPropertyValue, newPropertyValue) -> {
-            if (newPropertyValue) {
-                editorFocusedNode = scene.getFocusOwner();
-            }
-        });
+        editor.editorTable.getSelectionModel().select(0,editor.editorTable.getColumns().get(1));
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.W && event.isAltDown()) {
-                editorFocusedNode.requestFocus();
+                editor.editorTable.requestFocus();
             }
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
                 search.create(editor, viewer, unimarcHandler.getRecords(), unimarcHandler.getSearchMap());

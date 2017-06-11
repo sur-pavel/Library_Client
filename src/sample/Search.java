@@ -53,7 +53,7 @@ class Search {
         searchStage.setScene(searchScene);
 
         searchStage.initModality(Modality.NONE);
-        searchStage.initOwner(editor.editorPane.getScene().getWindow());
+        searchStage.initOwner(editor.editorTable.getScene().getWindow());
         searchStage.show();
         searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
         field.requestFocus();

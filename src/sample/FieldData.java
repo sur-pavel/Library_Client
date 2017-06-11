@@ -22,7 +22,7 @@ public class FieldData {
         return fieldData.get();
     }
 
-    public void setFielData(String searchVal) {
+    public void setFieldData(String searchVal) {
         fieldData.set(searchVal);
     }
 
