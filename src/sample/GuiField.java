@@ -1,85 +1,68 @@
 package sample;
 
-import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.*;
-
 
 
 class GuiField {
 
 
-
     private int fieldNumber;
     private CheckBox checkbox;
-//    private Button button = new Button();
+    private Button button = new Button();
     private Label fieldNameLabel;
     private TextField valueTextField;
-    private HBox hBox;
 
+    public int getFieldNumber() {
+        return fieldNumber;
+    }
 
-    GuiField(int number, String fieldName) {
-        this.fieldNumber = number;
-        this.checkbox = new CheckBox();
-
-        Font font = new Font("Tahoma",13);
-
-        this.fieldNameLabel = new Label(fieldName);
-        this.fieldNameLabel.setFont(font);
-        this.fieldNameLabel.setMinWidth(400);
-        this.fieldNameLabel.setMaxWidth(400);
-
-        this.valueTextField = new TextField();
-        this.valueTextField.setMinWidth(1150);
-        this.valueTextField.setFont(font);
-
-
-        this.hBox = new HBox();
-        this.hBox.getChildren().addAll(this.checkbox, fieldNameLabel, this.valueTextField);
-        this.hBox.setMargin(this.checkbox, new Insets(5, 0, 0, 10));
-        this.hBox.setMargin(fieldNameLabel, new Insets(5, 0, 0, 5));
-//        this.hBox.setMargin(this.button, new Insets(5, 0, 0, 5));
-        this.hBox.setMargin(this.valueTextField, new Insets(5, 0, 0, 5));
+    public void setFieldNumber(int fieldNumber) {
+        this.fieldNumber = fieldNumber;
     }
 
     public CheckBox getCheckbox() {
         return checkbox;
     }
 
+    public void setCheckbox(CheckBox checkbox) {
+        this.checkbox = checkbox;
+    }
+
+    public Button getButton() {
+        return button;
+    }
+
+    public void setButton(Button button) {
+        this.button = button;
+    }
+
     public Label getFieldNameLabel() {
         return fieldNameLabel;
     }
-//    public Button getButton() {
-//        return button;
-//    }
+
+    public void setFieldNameLabel(Label fieldNameLabel) {
+        this.fieldNameLabel = fieldNameLabel;
+    }
 
     public TextField getValueTextField() {
         return valueTextField;
     }
-    int getFieldNumber() {
-        return this.fieldNumber;
+
+    public void setValueTextField(TextField valueTextField) {
+        this.valueTextField = valueTextField;
+    }
+    public void setValue(String v){
+        this.valueTextField.setText(v);
     }
 
-    boolean isChecked() {
-        return this.checkbox.isSelected();
+    GuiField(int number, String fieldName) {
+        this.fieldNumber = number;
+        this.checkbox = new CheckBox();
+        this.fieldNameLabel = new Label(fieldName);
+        this.valueTextField = new TextField();
     }
 
-    void setValue(String value) {
-        this.valueTextField.setText(value);
-    }
-
-    HBox getHBox() {
-        return this.hBox;
-    }
-
-//    void setButtonNum(int num) {
-//        this.button.setText(String.valueOf(num));
-//    }
-
-    String getValue() {
-        return this.valueTextField.getText();
-    }
 }

@@ -1,14 +1,15 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.geometry.Insets;
+import javafx.application.Platform;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.GridPane;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marc4j.marc.Record;
 
@@ -18,7 +19,7 @@ public class Main extends Application {
 
 
     private ArrayList<Record> records = new ArrayList<>();
-
+    private Node editorFocusedNode;
 
     private Viewer viewer = new Viewer();
     private Editor editor = new Editor();
@@ -31,13 +32,6 @@ public class Main extends Application {
         Thread unimarcThread = new Thread(unimarcHandler);
         unimarcThread.start();
         primaryStage.setMaximized(true);
-//        primaryStage.setFullScreen(true);
-/*        currentRecord = records.get(0);
-        List<DataField> dataFields = currentRecord.getDataFields();*/
-
-
-// foundGPane
-        // foundTable
 
         TableView<Void> foundTable = new TableView<>();
         String[] columnsName = new String[]{"Мн", "Запись"};
@@ -50,52 +44,57 @@ public class Main extends Application {
         }
 
 
-        GridPane foundGPane = new GridPane();
-        //        gridPane.setAlignment(Pos.BASELINE_CENTER);
-        foundGPane.setVgap(5);
-        foundGPane.setHgap(5);
-        foundGPane.setPadding(new Insets(10));
-        foundGPane.add(foundTable, 1, 1);
-
 //rootSplitPane
         SplitPane splitPaneH1 = new SplitPane(editor.create());
         splitPaneH1.setDividerPositions(0.2);
         splitPaneH1.setOrientation(Orientation.HORIZONTAL);
-        SplitPane splitPaneH2 = new SplitPane(foundGPane, viewer.create());
+        SplitPane splitPaneH2 = new SplitPane(foundTable, viewer.create());
         splitPaneH2.setOrientation(Orientation.HORIZONTAL);
         splitPaneH2.setDividerPositions(0.35);
         SplitPane splitPaneV = new SplitPane(splitPaneH1, splitPaneH2);
         splitPaneV.setOrientation(Orientation.VERTICAL);
-        splitPaneV.setOnKeyPressed(event -> {
+
+
+        BorderPane root = new BorderPane();
+        root.setTop(getMenuBar());
+        root.setCenter(splitPaneV);
+
+        primaryStage.setTitle("Library Client");
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        editor.editorPane.focusedProperty().addListener((arg0, oldPropertyValue, newPropertyValue) -> {
+            if (newPropertyValue) {
+                editorFocusedNode = scene.getFocusOwner();
+            }
+        });
+        scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.W && event.isAltDown()) {
-                editor.editorPane.requestFocus();
-                editor.focusOnTextField();
+                editorFocusedNode.requestFocus();
             }
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
                 search.create(editor, viewer, unimarcHandler.getRecords(), unimarcHandler.getSearchMap());
             }
-            if (event.getCode() == KeyCode.Q && event.isControlDown()) {
-                primaryStage.close();
-            }
-            if (event.getCode() == KeyCode.F4 && event.isAltDown()) {
-                primaryStage.close();
-            }
-/*
-            if (event.getCode() == KeyCode.PLUS && event.isControlDown()) {
-
-            }
-*/
-
         });
-
-        Scene scene = new Scene(splitPaneV);
-        primaryStage.setTitle("Library Client");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        editor.focusOnTextField();
     }
 
+    private MenuBar getMenuBar() {
+        MenuBar menuBar = new MenuBar();
+        Menu file = new Menu("File");
+        MenuItem save = new MenuItem("Save");
+        MenuItem exit = new MenuItem("Exit");
+        exit.setOnAction(event -> Platform.exit());
+        exit.setAccelerator(new KeyCodeCombination(KeyCode.F4, KeyCombination.ALT_DOWN));
+        file.getItems().addAll(save, exit);
 
+        Menu settings = new Menu("Settings");
+        MenuItem fonts = new MenuItem("Fonts");
+        settings.getItems().addAll(fonts);
+
+        menuBar.getMenus().addAll(file, settings);
+        return menuBar;
+    }
 
 
     public static void main(String[] args) {

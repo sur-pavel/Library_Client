@@ -1,29 +1,47 @@
 package sample;
 
 import javafx.collections.ObservableList;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.text.Font;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public class Editor implements GuiElement {
-    private int currentField;
+public class Editor {
+    private int currentColumn = 3;
+    private int currentRow = 0;
+
+
+    public int getCurrentColumn() {
+        return currentColumn;
+    }
+
+    public int getCurrentRow() {
+        return currentRow;
+    }
+
     TabPane editorPane;
     private ArrayList<GuiField> guiFieldArrayList = new ArrayList<>();
     private StringBuilder builder;
-    private Map<String, Integer> tabTextFields = new HashMap<>();
 
-    @Override
-    public BorderPane create() {
-        createGuiFields();
+
+
+    TabPane create() {
 
         editorPane = new TabPane();
         editorPane.getTabs().clear();
@@ -52,91 +70,128 @@ public class Editor implements GuiElement {
         BorderPane editorBorderPane = new BorderPane();
         editorBorderPane.setCenter(editorPane);
         editorBorderPane.setPadding(new Insets(0));
-        return editorBorderPane;
+        return editorPane;
     }
 
     private Tab getТab(String name, ArrayList<Integer> tags) {
-        tabTextFields.put(name, tags.get(0));
         Tab tab = new Tab(name);
         ScrollPane scrollPane = new ScrollPane();
+
         GridPane gridPane = new GridPane();
         gridPane.setVgap(5);
         gridPane.setHgap(5);
-        gridPane.setAlignment(Pos.CENTER);
-        gridPane.setMaxSize(Region.USE_COMPUTED_SIZE,Region.USE_COMPUTED_SIZE);
-            int row = 0;
+        gridPane.setPadding(new Insets(10));
+        ColumnConstraints column1 = new ColumnConstraints();
+        ColumnConstraints column2 = new ColumnConstraints(0, 300, 300);
+        ColumnConstraints column3 = new ColumnConstraints();
+
+        ColumnConstraints column4 = new ColumnConstraints(1, 970, 970);
+        column4.setHgrow(Priority.ALWAYS);
+        gridPane.getColumnConstraints().addAll(column1, column2, column3, column4);
+
+        fillGridPane(tags, scrollPane, gridPane);
+        scrollPane.setContent(gridPane);
+        tab.setContent(scrollPane);
+        return tab;
+    }
+
+    private void fillGridPane(ArrayList<Integer> tags, ScrollPane scrollPane, GridPane gridPane) {
+        int rowNum = 0;
         for (Integer integer : tags) {
             for (String s : Constants.fieldsName) {
                 int num = Integer.parseInt(s.split(":")[0]);
                 if (integer == num) {
-                    CheckBox checkBox = new CheckBox();
-//                    checkBox.prefWidthProperty().bind(gridPane.widthProperty().subtract(10));
-                    gridPane.add(checkBox, 0, row);
+                    GuiField guiField = new GuiField(num, s);
+                    guiFieldArrayList.add(guiField);
 
-                    Label label = new Label(s);
-                    label.setFocusTraversable(false);
-                    label.setMaxWidth(300);
-                    label.setMinWidth(300);
-//                    label.prefWidthProperty().bind(gridPane.widthProperty().subtract(30));
-                    gridPane.add(label, 1, row);
-
-                    Button button = new Button("1");
-//                    button.prefWidthProperty().bind(gridPane.widthProperty().subtract(10));
-                    gridPane.add(button, 2, row);
+                    guiField.getCheckbox().setMaxWidth(Double.MAX_VALUE);
 
 
-                    TextField textField = new TextField();
-                    textField.setMaxWidth(800);
-                    textField.setMinWidth(800);
-//                    textField.prefWidthProperty().bind(gridPane.widthProperty().subtract(60));
-                    textField.setOnKeyPressed(event -> {
-                        switch (event.getCode()) {
-                            case DOWN:
-                                ObservableList<Node> children = gridPane.getChildren();
-                                for (int i = 0, size = children.size(); i < size; i++) {
-                                    if (children.get(i).isFocused()) {
-                                        if (i + 2 > size) {
-                                            children.get(3).requestFocus();
-                                            scrollPane.setVvalue(0);
-                                            break;
-                                        } else {
-                                            int nextTextFieldId = i + 4;
-                                            children.get(nextTextFieldId).requestFocus();
-                                            nodeInScrollPane(scrollPane, children.get(nextTextFieldId), 0.95);
-                                            break;
-                                        }
-                                    }
-                                }
-                                break;
-                            case UP:
-                                children = gridPane.getChildren();
-                                for (int i = 0, size = children.size(); i < size; i++) {
-                                    if (children.get(i).isFocused()) {
-                                        if (i - 4 < 0) {
-                                            children.get(size - 1).requestFocus();
-                                            scrollPane.setVvalue(1);
-                                            break;
-                                        } else {
-                                            int previousTextFieldId = i - 4;
-                                            children.get(previousTextFieldId).requestFocus();
-                                            nodeInScrollPane(scrollPane, children.get(previousTextFieldId), 0.05);
-                                            break;
-                                        }
-                                    }
-                                }
-                                break;
-                        }
-                    });
-                    gridPane.add(textField, 3, row);
-                    GridPane.setHgrow(label, Priority.ALWAYS);
-                    GridPane.setHgrow(textField, Priority.ALWAYS);
-                    row += 1;
+                    guiField.getFieldNameLabel().setFocusTraversable(false);
+                    guiField.getFieldNameLabel().setFont(new Font("Arial" ,13));
+
+                    guiField.getButton().setText("1");
+                    guiField.getButton().setMaxWidth(Double.MAX_VALUE);
+
+
+                    textFieldKeys(scrollPane, gridPane, guiField.getValueTextField());
+
+                    guiField.getValueTextField().setFont(new Font("Arial Bold", 13));
+
+                    gridPane.addRow(rowNum, guiField.getCheckbox(), guiField.getFieldNameLabel(), guiField.getButton(), guiField.getValueTextField());
+                    GridPane.setFillWidth(guiField.getValueTextField(), true);
+                    rowNum += 1;
                 }
             }
         }
-        scrollPane.setContent(gridPane);
-        tab.setContent(scrollPane);
-        return tab;
+    }
+
+    private void textFieldKeys(ScrollPane scrollPane, GridPane gridPane, TextField textField) {
+        textField.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case DOWN:
+                    ObservableList<Node> children = gridPane.getChildren();
+                    for (int i = 0, size = children.size(); i < size; i++) {
+                        if (children.get(i).isFocused()) {
+                            if (i + 2 > size) {
+                                children.get(3).requestFocus();
+                                scrollPane.setVvalue(0);
+                                break;
+                            } else {
+                                int nextTextFieldId = i + 4;
+                                children.get(nextTextFieldId).requestFocus();
+                                nodeInScrollPane(scrollPane, children.get(nextTextFieldId), 0.95);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case UP:
+                    children = gridPane.getChildren();
+                    for (int i = 0, size = children.size(); i < size; i++) {
+                        if (children.get(i).isFocused()) {
+                            if (i - 4 < 0) {
+                                children.get(size - 1).requestFocus();
+                                scrollPane.setVvalue(1);
+                                break;
+                            } else {
+                                int previousTextFieldId = i - 4;
+                                children.get(previousTextFieldId).requestFocus();
+                                nodeInScrollPane(scrollPane, children.get(previousTextFieldId), 0.05);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+            }
+            if (event.getCode() == KeyCode.END && event.isControlDown()) {
+                editorPane.getSelectionModel().selectLast();
+            }
+            if (event.getCode() == KeyCode.HOME && event.isControlDown()) {
+                editorPane.getSelectionModel().selectFirst();
+            }
+            if (event.getCode() == KeyCode.RIGHT && event.isAltDown()) {
+                editorPane.getSelectionModel().selectNext();
+            }
+            if (event.getCode() == KeyCode.LEFT && event.isAltDown()) {
+                editorPane.getSelectionModel().selectPrevious();
+            }
+            if (event.getCode() == KeyCode.Q && event.isControlDown()) {
+                EditorCom editorCom = new EditorCom();
+                editorCom.create(this);
+            }
+        });
+    }
+
+    void focusOnTextField(int num) {
+        for (GuiField guiField : guiFieldArrayList) {
+            if(guiField.getFieldNumber() == num){
+                guiField.getValueTextField().getParent().getParent().getParent().requestFocus();
+                guiField.getValueTextField().requestFocus();
+            }
+        }
+
     }
 
     private void nodeInScrollPane(ScrollPane scrollPane, Node node, double k) {
@@ -145,13 +200,12 @@ public class Editor implements GuiElement {
                 node.getBoundsInParent().getMinY()) / 2.0;
         double v = scrollPane.getViewportBounds().getHeight();
         if (y > v || y < v)
-        scrollPane.setVvalue(scrollPane.getVmax() * ((y - k * v) / (h - v)));
+            scrollPane.setVvalue(scrollPane.getVmax() * ((y - k * v) / (h - v)));
     }
 
-    @Override
-    public void update(Record record) {
-        List<DataField> dataFields;
-        dataFields = record.getDataFields();
+
+    void update(Record record) {
+        List<DataField> dataFields = record.getDataFields();
         for (DataField dataField : dataFields) {
             for (GuiField guiField : guiFieldArrayList) {
                 if (Integer.parseInt(dataField.getTag()) == guiField.getFieldNumber()) {
@@ -173,145 +227,6 @@ public class Editor implements GuiElement {
             builder.append("$").append(code).append(data);
         }
     }
-
-
-    private void createGuiFields() {
-        for (String s : Constants.fieldsName) {
-            int num = Integer.parseInt(s.split(":")[0]);
-            guiFieldArrayList.add(new GuiField(num, s));
-        }
-    }
-
-    private GuiField getGuiField(int num) {
-        int field = 0;
-        for (int i = 0; i < guiFieldArrayList.size(); i++) {
-            if (guiFieldArrayList.get(i).getFieldNumber() == num) field = i;
-        }
-        return guiFieldArrayList.get(field);
-    }
-
-    private void setGuiFieldListener(int prev, int current, int next) {
-        getGuiField(current).getValueTextField().focusedProperty().addListener((arg0, oldPropertyValue, newPropertyValue) -> {
-            if (newPropertyValue) {
-                currentField = current;
-            }
-        });
-        getGuiField(current).getValueTextField().setOnKeyPressed(event -> {
-            tabTextFields.put(editorPane.getSelectionModel().getSelectedItem().getText(), current);
-            switch (event.getCode()) {
-                case UP:
-                    if (prev != 0) {
-                        getGuiField(prev).getValueTextField().requestFocus();
-                        scroll();
-                    }
-
-                    break;
-
-                case DOWN:
-                    if (next != 0) {
-                        getGuiField(next).getValueTextField().requestFocus();
-                        scroll();
-                    }
-
-                    break;
-            }
-
-            if (event.getCode() == KeyCode.END && event.isControlDown()) {
-                editorPane.getSelectionModel().selectLast();
-                focusOnTextField();
-            }
-            if (event.getCode() == KeyCode.HOME && event.isControlDown()) {
-                editorPane.getSelectionModel().selectFirst();
-                focusOnTextField();
-            }
-            if (event.getCode() == KeyCode.RIGHT && event.isAltDown()) {
-                editorPane.getSelectionModel().selectNext();
-                focusOnTextField();
-            }
-            if (event.getCode() == KeyCode.LEFT && event.isAltDown()) {
-                editorPane.getSelectionModel().selectPrevious();
-                focusOnTextField();
-            }
-        });
-    }
-
-    private void scroll() {
-        HBox hbox = getGuiField(currentField).getHBox();
-
-        ScrollPane scrollPane = (ScrollPane) editorPane.getSelectionModel().getSelectedItem().getContent();
-
-        double hboxHeight = hbox.getBoundsInParent().getMaxY();
-        VBox vBox = (VBox) hbox.getParent();
-
-        Bounds bounds = scrollPane.getViewportBounds();
-        int lowestXPixelShown = -1 * (int) bounds.getMinX() + 1;
-        int highestXPixelShown = -1 * (int) bounds.getMinX() + (int) bounds.getMaxX();
-        double sPHeight = scrollPane.getHeight();
-        double vBoxHeight = vBox.getHeight();
-        double set;
-        if (hboxHeight == 310 && vBoxHeight == 372) scrollPane.setVvalue(0.1);
-        if (hboxHeight == 310 && vBoxHeight == 682) scrollPane.setVvalue(0.02);
-        if (hboxHeight == 310 && vBoxHeight == 465) scrollPane.setVvalue(0.03);
-        if (hboxHeight == 310 && vBoxHeight == 527) scrollPane.setVvalue(0.03);
-        if (hboxHeight == 310 && vBoxHeight == 403) scrollPane.setVvalue(0.05);
-        if (hboxHeight > 310) {
-            if (vBoxHeight == 372) scrollPane.setVvalue(scrollPane.getVvalue() + 0.47);
-            else if (vBoxHeight == 403) scrollPane.setVvalue(scrollPane.getVvalue() + 0.32);
-            else if (vBoxHeight == 465) scrollPane.setVvalue(scrollPane.getVvalue() + 0.195);
-            else if (vBoxHeight == 527) scrollPane.setVvalue(scrollPane.getVvalue() + 0.14);
-            else if (vBoxHeight == 682) scrollPane.setVvalue(scrollPane.getVvalue() + 0.0825);
-
-//            else set = scrollPane.getVvalue() + 0.1;
-//            scrollPane.setVvalue(set);
-            System.out.println(new StringJoiner(" ")
-                    .add("highPixel ")
-                    .add(String.valueOf(highestXPixelShown))
-                    .add("lowPixel")
-                    .add(String.valueOf(lowestXPixelShown))
-                    .add("hbox")
-                    .add(String.valueOf(hboxHeight))
-                    .add("vbox")
-                    .add(String.valueOf(vBoxHeight))
-                    .add("sPHeight")
-                    .add(String.valueOf(sPHeight)));
-        }
-    }
-
-
-    private void firstGuiFieldListener() {
-        getGuiField(700).getValueTextField().setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.DOWN) getGuiField(701).getValueTextField().requestFocus();
-            if (event.getCode() == KeyCode.END && event.isControlDown()) {
-                editorPane.getSelectionModel().selectLast();
-                focusOnTextField();
-            }
-            if (event.getCode() == KeyCode.HOME && event.isControlDown()) {
-                editorPane.getSelectionModel().selectFirst();
-                focusOnTextField();
-            }
-            if (event.getCode() == KeyCode.RIGHT && event.isAltDown()) {
-
-                editorPane.getSelectionModel().selectNext();
-                focusOnTextField();
-            }
-            if (event.getCode() == KeyCode.LEFT && event.isAltDown()) {
-                editorPane.getSelectionModel().selectPrevious();
-                focusOnTextField();
-            }
-        });
-    }
-
-    void focusOnTextField() {
-        for (Map.Entry<String, Integer> entry : tabTextFields.entrySet()) {
-            if (editorPane.getSelectionModel().getSelectedItem().getText().equals(entry.getKey())) {
-                getGuiField(entry.getValue()).getValueTextField().requestFocus();
-
-            }
-
-        }
-    }
-
-
 }
 
 
