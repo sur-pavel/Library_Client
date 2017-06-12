@@ -64,7 +64,7 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        editor.editorTable.getSelectionModel().select(0,editor.editorTable.getColumns().get(1));
+        editor.editorTable.getSelectionModel().select(0,editor.editorTable.getColumns().get(2));
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.W && event.isAltDown()) {
                 editor.editorTable.requestFocus();
