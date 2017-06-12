@@ -32,8 +32,8 @@ class Editor {
         fieldNameColumn.prefWidthProperty().bind(editorTable.widthProperty().multiply(0.2));
         fieldNameColumn.setCellValueFactory(
                 new PropertyValueFactory<>("fieldName"));
+        fieldNameColumn.getStyleClass().add("table-name-row-cell");
 
-        fieldNameColumn.setStyle( "-fx-font-weight:bold; -fx-font-size:13; -fx-text-origin: baseline;");
         fieldNameColumn.setEditable(false);
 
         TableColumn fieldDataColumn = new TableColumn("Значение");
@@ -44,8 +44,8 @@ class Editor {
 
 
 
+
         TableColumn actionCol = new TableColumn();
-        actionCol.setStyle( "-fx-alignment: CENTER;");
         actionCol.setCellValueFactory(new PropertyValueFactory<>(""));
 
         Callback<TableColumn<FieldData, String>, TableCell<FieldData, String>> cellFactory =

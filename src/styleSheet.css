@@ -33,17 +33,18 @@
 .table-row-cell:selected .row-header-cell {
     -fx-body-color: gold ;
 }
-/*
-.table-view .table-cell{
+
+.table-row-cell{
     -fx-text-fill: white;
 }
 
-.table-row-cell{
-    -fx-background-color: -fx-table-cell-border-color, #616161;
-    -fx-background-insets: 0, 0 0 1 0;
-    -fx-padding: 0.0em; !* 0 *!
+.table-name-row-cell{
+    -fx-background-color: -fx-table-cell-border-color, #a8a8a8;
+    -fx-font-weight: bold;
+    -fx-font-size: 13;
+    -fx-text-origin: baseline;
 }
-
+/*
 .table-row-cell:odd{
     -fx-background-color: -fx-table-cell-border-color, #424242;
     -fx-background-insets: 0, 0 0 1 0;
