@@ -1,4 +1,4 @@
-package sample;
+package ru.sur_pavel.Library_Client.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
@@ -8,7 +8,7 @@ public class SearchValue {
     private final SimpleStringProperty countValue;
     private final SimpleStringProperty searchValue;
 
-    SearchValue(String lead, String  countVal, String searchVal) {
+    public SearchValue(String lead, String countVal, String searchVal) {
         this.leader = new SimpleStringProperty(lead);
         this.countValue = new SimpleStringProperty(countVal);
         this.searchValue = new SimpleStringProperty(searchVal);

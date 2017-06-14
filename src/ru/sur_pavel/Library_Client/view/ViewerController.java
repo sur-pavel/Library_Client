@@ -1,32 +1,32 @@
-package sample;
+package ru.sur_pavel.Library_Client.view;
 
-import javafx.geometry.Insets;
-import javafx.scene.layout.BorderPane;
+import javafx.fxml.FXML;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import ru.sur_pavel.Library_Client.MainApp;
 
 import java.util.List;
 
-public class Viewer implements GuiElement{
-     public WebEngine webEngine;
+public class ViewerController {
+    @FXML
+    private WebEngine webEngine;
     private Record currentRecord;
+    private WebView webView;
+    private MainApp mainApp;
 
-    @Override
-    public BorderPane create() {
-        WebView webView = new WebView();
-        webView.autosize();
-        webView.setPrefSize(950, 220);
-        webEngine = webView.getEngine();
-        BorderPane viewBorderPane = new BorderPane();
-        viewBorderPane.setCenter(webView);
-        viewBorderPane.setPadding(new Insets(10));
-        return viewBorderPane;
+
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
     }
 
-    @Override
+    @FXML
+    private void initialize() {
+        webEngine = webView.getEngine();
+    }
+
     public void update(Record record) {
         currentRecord = record;
         webEngine.loadContent(getViewerBuilder().toString());

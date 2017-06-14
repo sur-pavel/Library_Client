@@ -1,8 +1,9 @@
-package sample;
+package ru.sur_pavel.Library_Client.view;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -10,43 +11,46 @@ import javafx.util.Callback;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import ru.sur_pavel.Library_Client.MainApp;
+import ru.sur_pavel.Library_Client.model.FieldData;
+import ru.sur_pavel.Library_Client.util.Constants;
 
-import java.util.ArrayList;
 import java.util.List;
 
-class Editor {
+public class EditorController {
 
-    TableView<FieldData> editorTable;
-    private ArrayList<TableView> editorTables = new ArrayList<>();
+    @FXML
+    private TableColumn<FieldData, String> actionColumn;
+    @FXML
+    private TableColumn<FieldData, String> nameColumn;
+    @FXML
+    private TableColumn<FieldData, String> dataColumn;
+    @FXML
+    private TableView<FieldData> editorTable;
+
+    private MainApp mainApp;
     private ObservableList<FieldData> fieldsData = FXCollections.observableArrayList();
 
-    TableView create() {
 
-        editorTable = new TableView<FieldData>();
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
+    }
+
+    @FXML
+    private void initialize() {
         editorTable.setEditable(true);
-        editorTable.getStylesheets().add("styleSheet.css");
         TableView.TableViewSelectionModel<FieldData> tsm = editorTable.getSelectionModel();
         tsm.setSelectionMode(SelectionMode.MULTIPLE);
 
-        TableColumn fieldNameColumn = new TableColumn("Поле");
-        fieldNameColumn.prefWidthProperty().bind(editorTable.widthProperty().multiply(0.2));
-        fieldNameColumn.setCellValueFactory(
-                new PropertyValueFactory<>("fieldName"));
-        fieldNameColumn.getStyleClass().add("table-name-row-cell");
+        nameColumn.setCellValueFactory(
+                cellData -> cellData.getValue().fieldNameProperty());
+        nameColumn.setEditable(false);
 
-        fieldNameColumn.setEditable(false);
+        dataColumn.setCellValueFactory(
+                cellData -> cellData.getValue().fieldDataProperty());
+        dataColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        TableColumn fieldDataColumn = new TableColumn("Значение");
-        fieldDataColumn.prefWidthProperty().bind(editorTable.widthProperty().multiply(0.77));
-        fieldDataColumn.setCellValueFactory(
-                new PropertyValueFactory<>("fieldData"));
-        fieldDataColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-
-
-
-
-        TableColumn actionCol = new TableColumn();
-        actionCol.setCellValueFactory(new PropertyValueFactory<>(""));
+        actionColumn.setCellValueFactory(new PropertyValueFactory<>(""));
 
         Callback<TableColumn<FieldData, String>, TableCell<FieldData, String>> cellFactory =
                 new Callback<TableColumn<FieldData, String>, TableCell<FieldData, String>>() {
@@ -68,7 +72,7 @@ class Editor {
                                     {
                                         FieldData fieldData = getTableView().getItems().get(getIndex());
                                         fieldsData.add(new FieldData(fieldData.getFieldName(), ""));
-                                        autoSort(fieldNameColumn);
+//                                        autoSort(nameColumn);
                                         System.out.println(fieldData.getFieldName() + "   " + fieldData.getFieldData());
                                     });
                                     setGraphic(btn);
@@ -80,25 +84,23 @@ class Editor {
                     }
                 };
 
-        actionCol.setCellFactory(cellFactory);
+        actionColumn.setCellFactory(cellFactory);
 
-        for (String fieldsName : Constants.rusMarcfields) {
+
+        for (String fieldsName : Constants.getRusMarcfields()) {
             fieldsData.add(new FieldData(fieldsName, ""));
-
         }
 
         editorTable.setItems(fieldsData);
-
-        editorTable.getColumns().addAll(actionCol, fieldNameColumn, fieldDataColumn);
         editorTable.getSelectionModel().setCellSelectionEnabled(true);
 
-        return editorTable;
     }
 
-    private void autoSort(TableColumn fieldNameColumn) {
-        fieldNameColumn.setSortType(TableColumn.SortType.ASCENDING);
-        editorTable.getSortOrder().add(fieldNameColumn);
-        fieldNameColumn.setSortable(true);
+
+    private void autoSort(TableColumn nameColumn) {
+        nameColumn.setSortType(TableColumn.SortType.ASCENDING);
+        editorTable.getSortOrder().add(nameColumn);
+        nameColumn.setSortable(true);
         editorTable.sort();
     }
 
@@ -116,14 +118,17 @@ class Editor {
 
     void update(Record record) {
 
-            for (int i = 0; i < fieldsData.size(); i++) {
-                List<DataField> dataFields = record.getDataFields();
-                for (DataField dataField : dataFields) {
-                    if (dataField.getTag().equals(fieldsData.get(i).getFieldName().split(":")[0])) {
-                        fieldsData.set(i, new FieldData(fieldsData.get(i).getFieldName(), setStringBuilder(dataField).toString()));
-                    }
+        for (int i = 0; i < fieldsData.size(); i++) {
+            List<DataField> dataFields = record.getDataFields();
+            for (DataField dataField : dataFields) {
+                if (dataField.getTag().equals(fieldsData.get(i).getFieldName().split(":")[0])) {
+                    fieldsData.set(i, new FieldData(fieldsData.get(i).getFieldName(), setStringBuilder(dataField).toString()));
                 }
             }
         }
     }
+
+}
+
+
 

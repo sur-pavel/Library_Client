@@ -1,7 +1,15 @@
-package sample;
+package ru.sur_pavel.Library_Client.util;
 
-final class Constants {
-    final static String[] fieldsName = {
+public final class Constants {
+    public static String[] getFieldsName() {
+        return fieldsName;
+    }
+
+    public static String[] getRusMarcfields() {
+        return rusMarcfields;
+    }
+
+    private final static String[] fieldsName = {
             "10: ISBN, Цена",
             "11: ISSN",
             "19: Идентификационный номер нетекстового материала",
@@ -192,7 +200,7 @@ final class Constants {
             "856: Электронный адрес документа",
             "899: Данные о местонахождении",
     };
-    final static String [] rusMarcfields = {
+    private final static String [] rusMarcfields = {
             "010: Международный стандартный номер книги: ISBN",
             "100: Данные общей обработки",
             "101: Язык документа",

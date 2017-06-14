@@ -1,4 +1,4 @@
-package sample;
+package ru.sur_pavel.Library_Client.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
@@ -7,8 +7,15 @@ public class FieldData {
     private final SimpleStringProperty fieldName;
     private final SimpleStringProperty fieldData;
 
+    public SimpleStringProperty fieldNameProperty() {
+        return fieldName;
+    }
 
-    FieldData(String fName, String fData) {
+    public SimpleStringProperty fieldDataProperty() {
+        return fieldData;
+    }
+
+    public FieldData(String fName, String fData) {
         this.fieldName = new SimpleStringProperty(fName);
         this.fieldData = new SimpleStringProperty(fData);
 

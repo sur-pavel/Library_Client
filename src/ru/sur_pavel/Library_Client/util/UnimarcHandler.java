@@ -1,4 +1,4 @@
-package sample;
+package ru.sur_pavel.Library_Client.util;
 
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamReader;
@@ -11,7 +11,7 @@ import java.io.*;
 import java.util.*;
 
 
-class UnimarcHandler implements Runnable {
+public class UnimarcHandler implements Runnable {
 
     public ArrayList<Record> getRecords() {
         return records;

@@ -1,7 +1,7 @@
-package sample;
+package ru.sur_pavel.Library_Client.util;
 
+import java.io.File;
 import java.util.*;
-import java.io.*;
 
 public abstract class DirWatcher extends TimerTask {
     private String path;

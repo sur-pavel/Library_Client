@@ -1,4 +1,4 @@
-package sample;
+package ru.sur_pavel.Library_Client.util;
 
 import java.io.*;
 

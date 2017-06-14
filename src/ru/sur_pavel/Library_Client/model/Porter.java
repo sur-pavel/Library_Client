@@ -1,4 +1,4 @@
-package sample;
+package ru.sur_pavel.Library_Client.model;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,7 +29,7 @@ public class Porter {
     private static final Pattern P = Pattern.compile("ь$");
     private static final Pattern NN = Pattern.compile("нн$");
 
-    String stem(String word) {
+    public String stem(String word) {
         word = word.toLowerCase();
         word = word.replace('ё', 'е');
         Matcher m = RVRE.matcher(word);
