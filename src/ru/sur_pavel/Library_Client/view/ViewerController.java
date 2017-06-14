@@ -12,9 +12,11 @@ import java.util.List;
 
 public class ViewerController {
     @FXML
+    private WebView webView;
+
+
     private WebEngine webEngine;
     private Record currentRecord;
-    private WebView webView;
     private MainApp mainApp;
 
 
