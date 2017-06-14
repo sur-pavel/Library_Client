@@ -127,7 +127,7 @@ public class MainApp extends Application {
             searchStage.setTitle("Search");
             searchStage.initModality(Modality.NONE);
             searchStage.initOwner(primaryStage);
-//            searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
+
             Scene scene = new Scene(page);
             searchStage.setScene(scene);
             SearchController controller = loader.getController();
@@ -137,6 +137,9 @@ public class MainApp extends Application {
             controller.setViewerController(viewerController);
 
             searchStage.show();
+            searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
+
+            controller.sceneKeys();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -86,11 +86,8 @@ public class SearchController {
             }
         });
 
-//        searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
-        fieldListeners();
-        searchField.requestFocus();
-//        sceneKeys();
 
+        fieldListeners();
     }
 
     private ListChangeListener<SearchValue> onItemSelected = itemSelected -> {
@@ -112,7 +109,8 @@ public class SearchController {
         searchTable.sort();
     }
 
-    private void sceneKeys() {
+    public void sceneKeys() {
+        searchField.requestFocus();
         searchStage.getScene().setOnKeyPressed(event -> {
 
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
