@@ -4,12 +4,11 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="348.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.102" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sur_pavel.Library_Client.view.EditorController">
+<AnchorPane prefHeight="348.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sur_pavel.Library_Client.view.EditorController">
    <children>
       <TableView fx:id="editorTable" layoutX="234.0" layoutY="74.0" prefHeight="348.0" prefWidth="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <columns>
-            <TableColumn fx:id="actionColumn" maxWidth="20.0" minWidth="20.0" prefWidth="20.0" text=" " />
+            <TableColumn fx:id="actionColumn" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text=" " />
           <TableColumn fx:id="nameColumn" maxWidth="2000.0" minWidth="20.0" prefWidth="75.0" text="Field" />
           <TableColumn fx:id="dataColumn" prefWidth="75.0" text="Value" />
         </columns>

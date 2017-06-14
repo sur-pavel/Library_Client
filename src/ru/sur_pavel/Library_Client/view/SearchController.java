@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import org.marc4j.marc.DataField;
@@ -33,6 +32,9 @@ public class SearchController {
     private TableColumn<SearchValue, String> titleColumn;
 
     private Stage searchStage;
+
+
+
     private MainApp mainApp;
     private int currentRow = 0;
     private Record currentRecord;
@@ -53,8 +55,9 @@ public class SearchController {
     private Date start;
     private Date finish;
 
-
-
+    public SearchController(){
+        titles.add(new SearchValue("", "", ""));
+    }
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
@@ -67,15 +70,13 @@ public class SearchController {
     private void initialize() {
         searchTable.setEditable(true);
         yearColumn.setCellValueFactory(
-                new PropertyValueFactory<>("countValue"));
-        // SIC! NB!  PropertyValueFactory<>("countValue") => get(set)CountValue()
+                cellData -> cellData.getValue().countValueProperty());
 
         titleColumn.setCellValueFactory(
-                new PropertyValueFactory<>("searchValue"));
+                cellData -> cellData.getValue().searchValueProperty());
 
         searchTable.setItems(titles);
-//        autoSort(searchValueColumn);
-//        searchTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        autoSort(titleColumn);
         searchTable.getSelectionModel().getSelectedItems().addListener(onItemSelected);
         searchTable.setOnKeyPressed(event -> {
             switch (event.getCode()) {
@@ -85,10 +86,11 @@ public class SearchController {
             }
         });
 
-        searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
+//        searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
         fieldListeners();
         searchField.requestFocus();
-        sceneKeys();
+//        sceneKeys();
+
     }
 
     private ListChangeListener<SearchValue> onItemSelected = itemSelected -> {

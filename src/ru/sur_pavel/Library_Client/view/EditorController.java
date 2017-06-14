@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -68,6 +69,7 @@ public class EditorController {
                                     setText(null);
                                 } else {
                                     btn.setMaxWidth(Double.MAX_VALUE);
+                                    btn.setText("1");
                                     btn.setOnAction((ActionEvent event) ->
                                     {
                                         FieldData fieldData = getTableView().getItems().get(getIndex());
@@ -80,6 +82,7 @@ public class EditorController {
                                 }
                             }
                         };
+                        cell.setAlignment(Pos.CENTER);
                         return cell;
                     }
                 };
@@ -91,8 +94,9 @@ public class EditorController {
             fieldsData.add(new FieldData(fieldsName, ""));
         }
 
+        autoSort(nameColumn);
         editorTable.setItems(fieldsData);
-        editorTable.getSelectionModel().setCellSelectionEnabled(true);
+//        editorTable.getSelectionModel().setCellSelectionEnabled(true);
 
     }
 

@@ -11,8 +11,6 @@ public class RootController {
 
     @FXML
     private SplitPane VerticalSplit;
-    @FXML
-    private SplitPane HorizontalSplit;
 
     private MainApp mainApp;
 
@@ -25,9 +23,6 @@ public class RootController {
         return VerticalSplit;
     }
 
-    public SplitPane getHorizontalSplit() {
-        return HorizontalSplit;
-    }
 
     @FXML
     private void handleSearch(){
