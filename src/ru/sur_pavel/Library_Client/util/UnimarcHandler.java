@@ -1,11 +1,14 @@
 package ru.sur_pavel.Library_Client.util;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamReader;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import ru.sur_pavel.Library_Client.model.SearchValue;
 
 import java.io.*;
 import java.util.*;
@@ -13,18 +16,21 @@ import java.util.*;
 
 public class UnimarcHandler implements Runnable {
 
-    public ArrayList<Record> getRecords() {
-        return records;
-    }
+
 
     private ArrayList<Record> records = new ArrayList<>();
     private Map<Leader, String> searchMap;
     private String mapFileName = "searchMap.ser";
+    private String sRecordsFileName = "shortRecords.ser";
     private ArrayList<File> marcFiles = new ArrayList<>();
+    private ObservableList<SearchValue> shortRecords = FXCollections.observableArrayList();
 
 
     public Map<Leader, String> getSearchMap() {
         return searchMap;
+    }
+    public ArrayList<Record> getRecords() {
+        return records;
     }
 
     private void getUnimarc() {
@@ -65,7 +71,7 @@ public class UnimarcHandler implements Runnable {
                 records.add(record);
             }
         }
-        createSearchMap();
+        createSMapSRecords();
 //        onChangeSerialize();
 
     }
@@ -76,7 +82,7 @@ public class UnimarcHandler implements Runnable {
             protected void onChange(File file, String action) {
                 // here we code the action on a change
                 System.out.println("File " + file.getName() + " action: " + action);
-                serializeMap();
+                serialize(mapFileName, searchMap);
             }
 
         };
@@ -86,7 +92,7 @@ public class UnimarcHandler implements Runnable {
     }
 
 
-    private void createSearchMap() {
+    private void createSMapSRecords() {
         if (deSerializeMap() != null) {
             searchMap = deSerializeMap();
         } else {
@@ -97,9 +103,18 @@ public class UnimarcHandler implements Runnable {
                         subFieldData(record, "200", 'a') +
                         subFieldData(record, "600", 'a');
                 searchMap.put(leader, searchString);
-//                System.out.println(searchString);
+
+
+                String title = new StringJoiner(" ")
+                        .add(subFieldData(record, "200", 'a'))
+                        .add(subFieldData(record, "200", 'h'))
+                        .add(subFieldData(record, "205", 'a'))
+                        .toString();
+                String year = subFieldData(record, "210", 'd');
+                shortRecords.add(new SearchValue(leader.toString(), year, title));
             }
-            serializeMap();
+            serialize(mapFileName, searchMap);
+            serialize(sRecordsFileName, shortRecords);
         }
     }
 
@@ -145,20 +160,22 @@ public class UnimarcHandler implements Runnable {
 
     }
 
-    private void serializeMap() {
+
+    private void serialize(String fileName, Object object){
         try {
             FileOutputStream fos =
-                    new FileOutputStream(mapFileName);
+                    new FileOutputStream(fileName);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(searchMap);
+            oos.writeObject(object);
             oos.close();
             fos.close();
-            System.out.printf("Serialized HashMap data is saved in searchMap.ser");
+            System.out.printf("Serialized" + object.toString() +
+                    " data is saved in " +
+                    fileName);
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
     }
-
 
     @Override
     public void run() {

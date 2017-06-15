@@ -1,6 +1,8 @@
 package ru.sur_pavel.Library_Client;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
@@ -9,9 +11,15 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.marc4j.marc.Leader;
+import org.marc4j.marc.Record;
+import ru.sur_pavel.Library_Client.model.SearchValue;
+import ru.sur_pavel.Library_Client.util.UnimarcHandler;
 import ru.sur_pavel.Library_Client.view.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class MainApp extends Application {
 
@@ -20,23 +28,40 @@ public class MainApp extends Application {
     private SplitPane hSplitPane;
     private ViewerController viewerController;
     private EditorController editorController;
+    private ArrayList<Record> records = new ArrayList<>();
+    private Map<Leader, String> searchMap;
+    private ObservableList<SearchValue> titles = FXCollections.observableArrayList(new SearchValue("","",""));
+    private UnimarcHandler unimarcHandler;
+
+
+    public Map<Leader, String> getSearchMap() {
+        return this.searchMap;
+    }
+
+    public ArrayList<Record> getRecords() {
+        return this.records;
+    }
+    public ViewerController getViewerController() {
+        return this.viewerController;
+    }
+
+    public EditorController getEditorController() {
+        return this.editorController;
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Library. Client");
-
-/*
-        UnimarcHandler unimarcHandler = new UnimarcHandler();
-        Thread unimarcThread = new Thread(unimarcHandler);
+        this.unimarcHandler = new UnimarcHandler();
+        Thread unimarcThread = new Thread(this.unimarcHandler);
         unimarcThread.start();
         primaryStage.setMaximized(true);
-*/
 
         initRoot();
         showEditor();
         showFound();
         showViewer();
-
     }
 
     private void initRoot() {
@@ -78,7 +103,6 @@ public class MainApp extends Application {
 
     private void showFound() {
         try {
-
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/Found.fxml"));
             AnchorPane found = loader.load();
@@ -100,7 +124,6 @@ public class MainApp extends Application {
 
     private void showViewer() {
         try {
-
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/Viewer.fxml"));
             AnchorPane viewer = loader.load();
@@ -127,19 +150,22 @@ public class MainApp extends Application {
             searchStage.setTitle("Search");
             searchStage.initModality(Modality.NONE);
             searchStage.initOwner(primaryStage);
-
             Scene scene = new Scene(page);
             searchStage.setScene(scene);
+
             SearchController controller = loader.getController();
             controller.setSearchStage(searchStage);
-
-            controller.setEditorController(editorController);
-            controller.setViewerController(viewerController);
+            controller.setMainApp(this);
+            controller.setTitles(titles);
 
             searchStage.show();
-            searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
 
+            records = unimarcHandler.getRecords();
+            searchMap = unimarcHandler.getSearchMap();
+            searchStage.focusedProperty().addListener((ov, t, t1) -> searchStage.close());
             controller.sceneKeys();
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }

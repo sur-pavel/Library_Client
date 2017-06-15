@@ -32,32 +32,19 @@ public class SearchController {
     private TableColumn<SearchValue, String> titleColumn;
 
     private Stage searchStage;
-
-
-
-    private MainApp mainApp;
     private int currentRow = 0;
+    private MainApp mainApp;
     private Record currentRecord;
-    private Map<Leader, String> searchMap;
-    private EditorController editorController;
-    private ViewerController viewerController;
-
-    public void setEditorController(EditorController editorController) {
-        this.editorController = editorController;
-    }
-
-    public void setViewerController(ViewerController viewerController) {
-        this.viewerController = viewerController;
-    }
-
     private ArrayList<Record> records = new ArrayList<>();
-    private final ObservableList<SearchValue> titles = FXCollections.observableArrayList();
+    private ObservableList<SearchValue> titles = FXCollections.observableArrayList();
     private Date start;
     private Date finish;
 
-    public SearchController(){
-        titles.add(new SearchValue("", "", ""));
+    public void setTitles(ObservableList<SearchValue> titles) {
+        this.titles = titles;
+        searchTable.setItems(titles);
     }
+
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
@@ -66,51 +53,11 @@ public class SearchController {
         this.searchStage = searchStage;
     }
 
-    @FXML
-    private void initialize() {
-        searchTable.setEditable(true);
-        yearColumn.setCellValueFactory(
-                cellData -> cellData.getValue().countValueProperty());
-
-        titleColumn.setCellValueFactory(
-                cellData -> cellData.getValue().searchValueProperty());
-
-        searchTable.setItems(titles);
-        autoSort(titleColumn);
-        searchTable.getSelectionModel().getSelectedItems().addListener(onItemSelected);
-        searchTable.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case ENTER:
-
-                    searchStage.close();
-            }
-        });
-
-
-        fieldListeners();
-    }
-
-    private ListChangeListener<SearchValue> onItemSelected = itemSelected -> {
-        for (SearchValue searchValue : itemSelected.getList())
-            for (Record record : records) {
-                Leader leader = record.getLeader();
-                if (leader.toString().equals(searchValue.getLeader())) {
-                    currentRecord = record;
-                    editorController.update(currentRecord);
-                    viewerController.update(currentRecord);
-                }
-            }
-    };
-
-    private void autoSort(TableColumn searchValueColumn) {
-        searchValueColumn.setSortType(TableColumn.SortType.ASCENDING);
-        searchTable.getSortOrder().add(searchValueColumn);
-        searchValueColumn.setSortable(true);
-        searchTable.sort();
-    }
-
     public void sceneKeys() {
+        records = mainApp.getRecords();
+
         searchField.requestFocus();
+
         searchStage.getScene().setOnKeyPressed(event -> {
 
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
@@ -122,6 +69,49 @@ public class SearchController {
             }
         });
     }
+
+    @FXML
+    private void initialize() {
+        searchTable.setEditable(true);
+        yearColumn.setCellValueFactory(
+                cellData -> cellData.getValue().countValueProperty());
+
+        titleColumn.setCellValueFactory(
+                cellData -> cellData.getValue().searchValueProperty());
+        autoSort(titleColumn);
+        searchTable.getSelectionModel().getSelectedItems().addListener(onItemSelected);
+        searchTable.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case ENTER:
+                    searchStage.close();
+            }
+        });
+
+
+        fieldListeners();
+    }
+
+    private ListChangeListener<SearchValue> onItemSelected = itemSelected -> {
+
+        for (SearchValue searchValue : itemSelected.getList()) {
+            for (Record record : records) {
+                Leader leader = record.getLeader();
+                if (leader.toString().equals(searchValue.getLeader())) {
+                    currentRecord = record;
+                    mainApp.getEditorController().update(currentRecord);
+                    mainApp.getViewerController().update(currentRecord);
+                }
+            }
+        }
+    };
+
+    private void autoSort(TableColumn searchValueColumn) {
+        searchValueColumn.setSortType(TableColumn.SortType.ASCENDING);
+        searchTable.getSortOrder().add(searchValueColumn);
+        searchValueColumn.setSortable(true);
+        searchTable.sort();
+    }
+
 
     private void fieldListeners() {
 /*        field.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -147,9 +137,9 @@ public class SearchController {
     }
 
     private void search(String input) {
-
         String[] splitInput = input.split(" ");
         ArrayList<Leader> leaders = new ArrayList<>();
+        Map<Leader, String> searchMap = mainApp.getSearchMap();
 
         for (Map.Entry<Leader, String> entry : searchMap.entrySet()) {
             if (containsAllWords(entry.getValue(), splitInput)){
@@ -162,7 +152,6 @@ public class SearchController {
     private void updateTableView(ArrayList<Leader> leaders) {
         start = new Date();
         titles.clear();
-
         for (Record record : records) {
             for (Leader leader : leaders) {
                 if (record.getLeader().toString().equals(leader.toString())) {
