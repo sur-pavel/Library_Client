@@ -46,11 +46,6 @@ public class SearchController {
     private Date start;
     private Date finish;
 
-    public void setTitles(ObservableList<SearchValue> titles) {
-        this.titles = titles;
-        searchTable.setItems(titles);
-    }
-
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
@@ -58,6 +53,12 @@ public class SearchController {
     public void setSearchStage(Stage searchStage) {
         this.searchStage = searchStage;
     }
+
+    public void setTitles(ObservableList<SearchValue> titles) {
+        this.titles = titles;
+        searchTable.setItems(titles);
+    }
+
 
     public void sceneKeys() {
         records = mainApp.getRecords();
@@ -68,10 +69,19 @@ public class SearchController {
 
             if (event.getCode() == KeyCode.F && event.isControlDown()) {
                 currentRow = searchTable.getSelectionModel().getFocusedIndex();
-                searchField.requestFocus();
+//                tabPane.requestFocus();
+                int tabNum = tabPane.getSelectionModel().getSelectedIndex();
+                if (tabNum == 0)
+                    searchField.requestFocus();
+                if (tabNum == 1)
+                    specField.requestFocus();
             }
             if (event.getCode() == KeyCode.ESCAPE) {
                 searchStage.close();
+            }
+            if (event.getCode() == KeyCode.TAB && event.isControlDown()) {
+                tabPane.requestFocus();
+                tabPane.getSelectionModel().selectNext();
             }
         });
     }
@@ -96,7 +106,8 @@ public class SearchController {
             comboBox.getItems().add(fieldsName);
         new AutoCompleteComboBoxListener<>(comboBox);
 
-        fieldListeners();
+        fieldListeners(searchField);
+        fieldListeners(specField);
     }
 
     private ListChangeListener<SearchValue> onItemSelected = itemSelected -> {
@@ -121,7 +132,7 @@ public class SearchController {
     }
 
 
-    private void fieldListeners() {
+    private void fieldListeners(TextField textField) {
 /*        field.textProperty().addListener((observable, oldValue, newValue) -> {
             if (comboBox.getValue() != null &&
                     !comboBox.getValue().toString().isEmpty()) {
@@ -130,10 +141,10 @@ public class SearchController {
                 if (text.length() > 4) search(fieldName, text);
             }
         });*/
-        searchField.setOnKeyPressed(event -> {
+        textField.setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case ENTER:
-                    String text = searchField.getText().toLowerCase();
+                    String text = textField.getText().toLowerCase();
                     if (text.length() > 4) search(text);
 
                 case DOWN:
@@ -158,14 +169,27 @@ public class SearchController {
         Map<Leader, String> searchMap = mainApp.getSearchMap();
 
         for (Map.Entry<Leader, String> entry : searchMap.entrySet()) {
-            if (containsAllWords(entry.getValue(), splitInput)){
+            if (containsAllWords(entry.getValue(), splitInput)) {
                 leaders.add(entry.getKey());
             }
         }
         updateTableView(leaders);
     }
-    private void search(String fieldName, String text){
 
+    private void search(String fieldName, String input) {
+        String[] splitInput = input.split(" ");
+        String tag = fieldName.split(":")[0];
+        ArrayList<Leader> leaders = new ArrayList<>();
+        for (Record record : records) {
+            if (record.getVariableField(tag) != null) {
+                DataField field = (DataField) record.getVariableField(tag);
+                if(containsAllWords(field.toString(), splitInput)){
+                    leaders.add(record.getLeader());
+                }
+            }
+
+        }
+        updateTableView(leaders);
     }
 
     private void updateTableView(ArrayList<Leader> leaders) {

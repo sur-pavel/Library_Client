@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.marc4j.marc.Leader;
@@ -144,7 +145,7 @@ public class MainApp extends Application {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/Search.fxml"));
-            AnchorPane page = loader.load();
+            VBox page = loader.load();
 
             Stage searchStage = new Stage();
             searchStage.setTitle("Search");

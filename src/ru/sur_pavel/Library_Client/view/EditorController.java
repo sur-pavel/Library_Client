@@ -8,12 +8,15 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.stage.Popup;
 import javafx.util.Callback;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import ru.sur_pavel.Library_Client.MainApp;
 import ru.sur_pavel.Library_Client.model.FieldData;
+import ru.sur_pavel.Library_Client.util.AutoCompleteComboBoxListener;
 import ru.sur_pavel.Library_Client.util.Constants;
 
 import java.util.List;
@@ -40,6 +43,29 @@ public class EditorController {
     @FXML
     private void initialize() {
         editorTable.setEditable(true);
+        editorTable.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.Q && event.isAltDown()) {
+
+                Popup popup = new Popup();
+                ComboBox<String> comboBox = new ComboBox<>();
+                for (String fieldsName : Constants.getRusMarcfields())
+                    comboBox.getItems().add(fieldsName);
+                new AutoCompleteComboBoxListener<>(comboBox);
+                comboBox.setOnKeyTyped(event1 -> {
+                    if(event1.getCode() == KeyCode.ENTER) {
+                        for (FieldData fieldData : fieldsData) {
+                            if (fieldData.getFieldName().contains(comboBox.getValue())) {
+                                editorTable.getSelectionModel().clearSelection();
+                                editorTable.getSelectionModel().select(fieldData);
+                                popup.hide();
+                            }
+                        }
+                    }
+                });
+                popup.getContent().add(comboBox);
+                popup.show(editorTable.getScene().getWindow());
+            }
+        });
         TableView.TableViewSelectionModel<FieldData> tsm = editorTable.getSelectionModel();
         tsm.setSelectionMode(SelectionMode.MULTIPLE);
 
