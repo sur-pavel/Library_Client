@@ -4,9 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import org.marc4j.marc.DataField;
@@ -16,12 +14,16 @@ import org.marc4j.marc.Subfield;
 import ru.sur_pavel.Library_Client.MainApp;
 import ru.sur_pavel.Library_Client.model.Porter;
 import ru.sur_pavel.Library_Client.model.SearchValue;
+import ru.sur_pavel.Library_Client.util.AutoCompleteComboBoxListener;
+import ru.sur_pavel.Library_Client.util.Constants;
 
 import java.util.*;
 
 
 public class SearchController {
 
+    @FXML
+    private TabPane tabPane;
     @FXML
     private TextField searchField;
     @FXML
@@ -30,6 +32,8 @@ public class SearchController {
     private TableColumn<SearchValue, String> yearColumn;
     @FXML
     private TableColumn<SearchValue, String> titleColumn;
+    @FXML
+    private ComboBox<String> comboBox;
 
     private Stage searchStage;
     private int currentRow = 0;
@@ -86,7 +90,10 @@ public class SearchController {
                     searchStage.close();
             }
         });
+        for (String fieldsName : Constants.getRusMarcfields())
+            comboBox.getItems().add(fieldsName);
 
+        AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener<>(comboBox);
 
         fieldListeners();
     }
@@ -180,9 +187,9 @@ public class SearchController {
         StringJoiner joiner = new StringJoiner(" ");
         if (record.getVariableField(tag) != null) {
             DataField field = (DataField) record.getVariableField(tag);
-            List subfields = field.getSubfields();
-            for (Object subField : subfields) {
-                Subfield subF = (Subfield) subField;
+            List<Subfield> subfields = field.getSubfields();
+            for (Subfield subField : subfields) {
+                Subfield subF = subField;
                 if (subF.getCode() == code && !subF.getData().equals("")) {
                     joiner.add(subF.getData());
                 }
