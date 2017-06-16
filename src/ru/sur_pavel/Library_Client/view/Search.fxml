@@ -12,11 +12,11 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sur_pavel.Library_Client.view.SearchController">
+<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <TabPane fx:id="tabPane" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <tabs>
-          <Tab text="Simple">
+      <TabPane fx:id="tabPane" prefHeight="113.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
+         <tabs>
+            <Tab text="Simple">
                <content>
                   <VBox prefHeight="200.0" prefWidth="100.0">
                      <children>
@@ -32,28 +32,33 @@
                               <TextField fx:id="searchField" maxWidth="-Infinity" prefWidth="400.0" BorderPane.alignment="CENTER" />
                            </center>
                         </BorderPane>
-                        <TableView fx:id="searchTable" prefHeight="286.0" prefWidth="600.0">
-                          <columns>
-                            <TableColumn fx:id="yearColumn" maxWidth="1000.0" prefWidth="75.0" text="Year" />
-                            <TableColumn fx:id="titleColumn" prefWidth="75.0" text="Title" />
-                          </columns>
-                           <columnResizePolicy>
-                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy>
-                        </TableView>
                      </children>
                   </VBox>
                </content>
             </Tab>
-          <Tab text="Spec">
+            <Tab text="Spec">
                <content>
                   <AnchorPane>
                      <children>
                         <ComboBox fx:id="comboBox" editable="true" prefWidth="150.0" visibleRowCount="8" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="30.0" />
+                        <TextField fx:id="specField" layoutX="245.0" layoutY="30.0" prefHeight="25.0" prefWidth="302.0" />
                      </children>
                   </AnchorPane>
-               </content></Tab>
-        </tabs>
+               </content>
+            </Tab>
+         </tabs>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
       </TabPane>
+      <TableView fx:id="searchTable" prefHeight="286.0" prefWidth="600.0">
+         <columns>
+            <TableColumn fx:id="yearColumn" maxWidth="1000.0" prefWidth="75.0" text="Year" />
+            <TableColumn fx:id="titleColumn" prefWidth="75.0" text="Title" />
+         </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
    </children>
-</AnchorPane>
+</VBox>

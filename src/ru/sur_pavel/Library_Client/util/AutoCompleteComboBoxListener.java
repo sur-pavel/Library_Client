@@ -27,24 +27,29 @@ public class AutoCompleteComboBoxListener<T> implements EventHandler<KeyEvent> {
 
     @Override
     public void handle(KeyEvent event) {
-
-        if(event.getCode() == KeyCode.UP) {
-            caretPos = -1;
-            moveCaret(comboBox.getEditor().getText().length());
-            return;
-        } else if(event.getCode() == KeyCode.DOWN) {
-            if(!comboBox.isShowing()) {
-                comboBox.show();
-            }
-            caretPos = -1;
-            moveCaret(comboBox.getEditor().getText().length());
-            return;
-        } else if(event.getCode() == KeyCode.BACK_SPACE) {
-            moveCaretToPos = true;
-            caretPos = comboBox.getEditor().getCaretPosition();
-        } else if(event.getCode() == KeyCode.DELETE) {
-            moveCaretToPos = true;
-            caretPos = comboBox.getEditor().getCaretPosition();
+        switch (event.getCode()){
+            case UP:
+                caretPos = -1;
+                moveCaret(comboBox.getEditor().getText().length());
+                return;
+            case DOWN:
+                if(!comboBox.isShowing()) {
+                    comboBox.show();
+                }
+                caretPos = -1;
+                moveCaret(comboBox.getEditor().getText().length());
+                return;
+            case BACK_SPACE:
+                moveCaretToPos = true;
+                caretPos = comboBox.getEditor().getCaretPosition();
+                break;
+            case DELETE:
+                moveCaretToPos = true;
+                caretPos = comboBox.getEditor().getCaretPosition();
+                break;
+            case ESCAPE:
+                comboBox.getEditor().setText("");
+                break;
         }
 
         if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.LEFT
@@ -52,6 +57,7 @@ public class AutoCompleteComboBoxListener<T> implements EventHandler<KeyEvent> {
                 || event.getCode() == KeyCode.END || event.getCode() == KeyCode.TAB) {
             return;
         }
+
 
         ObservableList list = FXCollections.observableArrayList();
         for (T aData : data) {

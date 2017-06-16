@@ -27,6 +27,8 @@ public class SearchController {
     @FXML
     private TextField searchField;
     @FXML
+    private TextField specField;
+    @FXML
     private TableView<SearchValue> searchTable;
     @FXML
     private TableColumn<SearchValue, String> yearColumn;
@@ -92,8 +94,7 @@ public class SearchController {
         });
         for (String fieldsName : Constants.getRusMarcfields())
             comboBox.getItems().add(fieldsName);
-
-        AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener<>(comboBox);
+        new AutoCompleteComboBoxListener<>(comboBox);
 
         fieldListeners();
     }
@@ -141,6 +142,14 @@ public class SearchController {
                     searchTable.getFocusModel().focus(0);
             }
         });
+        specField.setOnAction(event -> {
+            if (comboBox.getValue() != null &&
+                    !comboBox.getValue().toString().isEmpty()) {
+                String fieldName = comboBox.getValue().toString();
+                String text = specField.getText().toLowerCase();
+                if (text.length() > 4) search(fieldName, text);
+            }
+        });
     }
 
     private void search(String input) {
@@ -154,6 +163,9 @@ public class SearchController {
             }
         }
         updateTableView(leaders);
+    }
+    private void search(String fieldName, String text){
+
     }
 
     private void updateTableView(ArrayList<Leader> leaders) {
