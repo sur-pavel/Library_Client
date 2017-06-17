@@ -1,10 +1,12 @@
 package ru.sur_pavel.Library_Client.view;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -43,22 +45,26 @@ public class EditorController {
     @FXML
     private void initialize() {
         editorTable.setEditable(true);
+        editorTable.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super FieldData>) observable -> {
+            editorTable.getFocusModel().focus(editorTable.getFocusModel().getFocusedCell().getRow(), dataColumn);
+        });
+
         editorTable.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.Q && event.isAltDown()) {
 
                 Popup popup = new Popup();
                 ComboBox<String> comboBox = new ComboBox<>();
-                for (String fieldsName : Constants.getRusMarcfields())
+                for (String fieldsName : Constants.getMarcFieldsIrbisName())
                     comboBox.getItems().add(fieldsName);
                 new AutoCompleteComboBoxListener<>(comboBox);
-                comboBox.setOnKeyTyped(event1 -> {
-                    if(event1.getCode() == KeyCode.ENTER) {
+                comboBox.setOnAction(e -> {
                         for (FieldData fieldData : fieldsData) {
                             if (fieldData.getFieldName().contains(comboBox.getValue())) {
+                                popup.hide();
                                 editorTable.getSelectionModel().clearSelection();
                                 editorTable.getSelectionModel().select(fieldData);
-                                popup.hide();
-                            }
+                                editorTable.scrollTo(fieldData);
+
                         }
                     }
                 });
@@ -116,7 +122,7 @@ public class EditorController {
         actionColumn.setCellFactory(cellFactory);
 
 
-        for (String fieldsName : Constants.getRusMarcfields()) {
+        for (String fieldsName : Constants.getMarcFieldsIrbisName()) {
             fieldsData.add(new FieldData(fieldsName, ""));
         }
 
@@ -158,6 +164,14 @@ public class EditorController {
         }
     }
 
+    private void nodeInScrollPane(ScrollPane scrollPane, Node node, double k) {
+        double h = scrollPane.getContent().getBoundsInLocal().getHeight();
+        double y = (node.getBoundsInParent().getMaxY() +
+                node.getBoundsInParent().getMinY()) / 2.0;
+        double v = scrollPane.getViewportBounds().getHeight();
+        if (y > v || y < v)
+            scrollPane.setVvalue(scrollPane.getVmax() * ((y - k * v) / (h - v)));
+    }
 }
 
 

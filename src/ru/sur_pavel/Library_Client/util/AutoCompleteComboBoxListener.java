@@ -4,7 +4,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 public class AutoCompleteComboBoxListener<T> implements EventHandler<KeyEvent> {
@@ -50,14 +49,18 @@ public class AutoCompleteComboBoxListener<T> implements EventHandler<KeyEvent> {
             case ESCAPE:
                 comboBox.getEditor().setText("");
                 break;
+            case HOME:
+                moveCaretToPos = true;
+                caretPos = 0;
+                break;
+            case END:
+                moveCaretToPos = false;
+                break;
+            case RIGHT:
+            case LEFT:
+            case TAB:
+                return;
         }
-
-        if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.LEFT
-                || event.isControlDown() || event.getCode() == KeyCode.HOME
-                || event.getCode() == KeyCode.END || event.getCode() == KeyCode.TAB) {
-            return;
-        }
-
 
         ObservableList list = FXCollections.observableArrayList();
         for (T aData : data) {
