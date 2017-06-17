@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ *  Application for viewing and editing records in unimarc format.
+ */
 public class MainApp extends Application {
 
     private Stage primaryStage;
@@ -34,24 +37,40 @@ public class MainApp extends Application {
     private ObservableList<SearchValue> titles = FXCollections.observableArrayList(new SearchValue("","",""));
     private UnimarcHandler unimarcHandler;
 
-
+    /**
+     * @return HashMap with short records for search created in UnimarcHandler
+     */
     public Map<Leader, String> getSearchMap() {
         return this.searchMap;
     }
 
+    /**
+     * @return list of all unimarc records from UnimarcHandler
+     */
     public ArrayList<Record> getRecords() {
         return this.records;
     }
+
+    /**
+     * @return object of viewerController
+     */
     public ViewerController getViewerController() {
         return this.viewerController;
     }
 
+    /**
+     * @return object of editorController
+     */
     public EditorController getEditorController() {
         return this.editorController;
     }
 
+    /**
+     * Called when the application start
+     * @param primaryStage root stage of the application
+     */
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Library. Client");
         this.unimarcHandler = new UnimarcHandler();
@@ -65,6 +84,10 @@ public class MainApp extends Application {
         showViewer();
     }
 
+    /**
+     * Load root layout from Root.fxml
+     * and gets reference to verticalSplit
+     */
     private void initRoot() {
         try {
             FXMLLoader loader = new FXMLLoader();
@@ -83,6 +106,10 @@ public class MainApp extends Application {
             e.printStackTrace();
         }
     }
+    /**
+     * Load editor layout from Editor.fxml
+     * and adds it to root verticalSplit
+     */
 
     private void showEditor() {
         try {
@@ -102,6 +129,11 @@ public class MainApp extends Application {
 
     }
 
+    /**
+     * Load found layout from Found.fxml
+     * create horizontalSplit in root verticalSplit
+     * and adds found layout to verticalSplit
+     */
     private void showFound() {
         try {
             FXMLLoader loader = new FXMLLoader();
@@ -122,7 +154,10 @@ public class MainApp extends Application {
     }
 
 
-
+    /**
+     * Load viewer layout from Viewer.fxml
+     * and adds it to horizontalSplit next to found layout
+     */
     private void showViewer() {
         try {
             FXMLLoader loader = new FXMLLoader();
@@ -140,18 +175,23 @@ public class MainApp extends Application {
     }
 
 
-
+    /**
+     * Load search layout from Search.fxml
+     * create separate stage and scene
+     * adds search vBox on scene
+     * transfers the data necessary for the search
+     */
     public void showSearch() {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/Search.fxml"));
-            VBox page = loader.load();
+            VBox vBox = loader.load();
 
             Stage searchStage = new Stage();
             searchStage.setTitle("Search");
             searchStage.initModality(Modality.NONE);
             searchStage.initOwner(primaryStage);
-            Scene scene = new Scene(page);
+            Scene scene = new Scene(vBox);
             searchStage.setScene(scene);
 
             SearchController controller = loader.getController();

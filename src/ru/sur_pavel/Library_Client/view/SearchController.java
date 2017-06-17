@@ -19,7 +19,9 @@ import ru.sur_pavel.Library_Client.util.Constants;
 
 import java.util.*;
 
-
+/**
+ * Controller for search layout
+ */
 public class SearchController {
 
     @FXML
@@ -46,20 +48,35 @@ public class SearchController {
     private Date start;
     private Date finish;
 
+    /**
+     * Sets MainApp object for controller
+     * @param mainApp object
+     */
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
 
+    /**
+     * Sets stage for search layout
+     * @param searchStage search stage
+     */
     public void setSearchStage(Stage searchStage) {
         this.searchStage = searchStage;
     }
 
+    /**
+     * Sets list of searchTable items
+     * @param titles list of items
+     */
     public void setTitles(ObservableList<SearchValue> titles) {
         this.titles = titles;
         searchTable.setItems(titles);
     }
 
-
+    /**
+     * Sets keys for search scene
+     * and request focus for searchField in first Tab
+     */
     public void sceneKeys() {
         records = mainApp.getRecords();
 

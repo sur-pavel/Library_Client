@@ -13,7 +13,9 @@ import ru.sur_pavel.Library_Client.model.SearchValue;
 import java.io.*;
 import java.util.*;
 
-
+/**
+ * Class for obtaining data from unimarc files
+ */
 public class UnimarcHandler implements Runnable {
 
 
@@ -26,13 +28,24 @@ public class UnimarcHandler implements Runnable {
     private ObservableList<SearchValue> shortRecords = FXCollections.observableArrayList();
 
 
+    /**
+     * @return HashMap with short records for search
+     */
     public Map<Leader, String> getSearchMap() {
         return searchMap;
     }
+
+    /**
+     * @return list of all unimarc records
+     */
     public ArrayList<Record> getRecords() {
         return records;
     }
 
+    /**
+     * Loads all files in directory "marcFiles"
+     * forms list of unimarc records
+     */
     private void getUnimarc() {
 
         File folder = new File("marcFiles");
@@ -76,6 +89,9 @@ public class UnimarcHandler implements Runnable {
 
     }
 
+    /**
+     * call serialize method when files in marcFiles directory changes
+     */
     private void onChangeSerialize() {
         TimerTask task = new DirWatcher("marcFiles", "ISO") {
             @Override
@@ -92,6 +108,11 @@ public class UnimarcHandler implements Runnable {
     }
 
 
+    /**
+     * Forms HashMap for search
+     * from deSerialized file or
+     * from unimarc records
+     */
     private void createSMapSRecords() {
         if (deSerializeMap() != null) {
             searchMap = deSerializeMap();
@@ -118,6 +139,13 @@ public class UnimarcHandler implements Runnable {
         }
     }
 
+    /**
+     * Gets data from unimarc record subField
+     * @param record whose subFields
+     * @param tag of field
+     * @param code of subField
+     * @return string with data of subField
+     */
     private String subFieldData(Record record, String tag, char code) {
         StringBuilder builder = new StringBuilder();
         if (record.getVariableField(tag) != null) {
@@ -133,6 +161,10 @@ public class UnimarcHandler implements Runnable {
         return builder.toString();
     }
 
+    /**
+     * deserialize HashMap for search from file
+     * @return HashMap
+     */
     private HashMap<Leader, String> deSerializeMap() {
 
         HashMap<Leader, String> deSerializedMap = null;
@@ -161,6 +193,11 @@ public class UnimarcHandler implements Runnable {
     }
 
 
+    /**
+     * serialize object
+     * @param fileName to save in
+     * @param object for serializing
+     */
     private void serialize(String fileName, Object object){
         try {
             FileOutputStream fos =

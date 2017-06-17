@@ -23,6 +23,9 @@ import ru.sur_pavel.Library_Client.util.Constants;
 
 import java.util.List;
 
+/**
+ * Controller to handle editor items
+ */
 public class EditorController {
 
     @FXML
@@ -38,17 +41,26 @@ public class EditorController {
     private ObservableList<FieldData> fieldsData = FXCollections.observableArrayList();
 
 
+    /**
+     * set MainApp object
+     * @param mainApp object
+     */
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
 
+    /**
+     * Invokes when loading editor layer.
+     * Adjusts the behavior of the editorTable
+     * and its columns
+     */
     @FXML
     private void initialize() {
         editorTable.setEditable(true);
+        // setting focus on dataColumn
         editorTable.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super FieldData>) observable -> {
             editorTable.getFocusModel().focus(editorTable.getFocusModel().getFocusedCell().getRow(), dataColumn);
         });
-
         editorTable.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.Q && event.isAltDown()) {
 
@@ -64,7 +76,7 @@ public class EditorController {
                                 editorTable.getSelectionModel().clearSelection();
                                 editorTable.getSelectionModel().select(fieldData);
                                 editorTable.scrollTo(fieldData);
-
+// after popup hide focus not on the dataColumn
                         }
                     }
                 });
@@ -106,7 +118,6 @@ public class EditorController {
                                     {
                                         FieldData fieldData = getTableView().getItems().get(getIndex());
                                         fieldsData.add(new FieldData(fieldData.getFieldName(), ""));
-//                                        autoSort(nameColumn);
                                         System.out.println(fieldData.getFieldName() + "   " + fieldData.getFieldData());
                                     });
                                     setGraphic(btn);
@@ -132,7 +143,10 @@ public class EditorController {
 
     }
 
-
+    /**
+     * Sorts items in editorTable
+     * @param nameColumn object of column
+     */
     private void autoSort(TableColumn nameColumn) {
         nameColumn.setSortType(TableColumn.SortType.ASCENDING);
         editorTable.getSortOrder().add(nameColumn);
@@ -140,7 +154,11 @@ public class EditorController {
         editorTable.sort();
     }
 
-
+    /**
+     * Create stringBuilder for
+     * @param dataField
+     * @return
+     */
     private StringBuilder setStringBuilder(DataField dataField) {
         StringBuilder builder = new StringBuilder();
         List<Subfield> subFields = dataField.getSubfields();
@@ -152,6 +170,10 @@ public class EditorController {
         return builder;
     }
 
+    /**
+     * Forms data for editorTable
+     * @param record with necessary data
+     */
     void update(Record record) {
 
         for (int i = 0; i < fieldsData.size(); i++) {
@@ -164,6 +186,12 @@ public class EditorController {
         }
     }
 
+    /**
+     * Scrolls scrollPane to make node visible
+     * @param scrollPane object
+     * @param node object
+     * @param k coefficient for position of scrollPane
+     */
     private void nodeInScrollPane(ScrollPane scrollPane, Node node, double k) {
         double h = scrollPane.getContent().getBoundsInLocal().getHeight();
         double y = (node.getBoundsInParent().getMaxY() +
