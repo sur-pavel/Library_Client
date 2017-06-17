@@ -2,6 +2,9 @@ package ru.sur_pavel.Library_Client.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
+/**
+ * Class of objects for searchTable
+ */
 public class SearchValue {
 
     private final SimpleStringProperty leader;

@@ -12,7 +12,7 @@ import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import ru.sur_pavel.Library_Client.MainApp;
-import ru.sur_pavel.Library_Client.model.Porter;
+import ru.sur_pavel.Library_Client.util.Porter;
 import ru.sur_pavel.Library_Client.model.SearchValue;
 import ru.sur_pavel.Library_Client.util.AutoCompleteComboBoxListener;
 import ru.sur_pavel.Library_Client.util.Constants;

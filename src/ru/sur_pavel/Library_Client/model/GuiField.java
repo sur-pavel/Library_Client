@@ -5,6 +5,9 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
+/**
+ * Class of objects for editor gridPane row
+ */
 
 class GuiField {
 

@@ -1,8 +1,11 @@
-package ru.sur_pavel.Library_Client.model;
+package ru.sur_pavel.Library_Client.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Class of Porter Stemming for Russian language
+ */
 public class Porter {
 
     private static final Pattern PERFECTIVEGROUND = Pattern.compile("((ив|ивши|ившись|ыв|ывши|ывшись)|((?<=[ая])(в|вши|вшись)))$");
